@@ -30,10 +30,28 @@ class _EditorScreenState extends State<EditorScreen> {
   void initState() {
     super.initState();
     _loadJobs();
+    // Listen to job changes to clear selected image when job completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<JobProvider>().addListener(_onJobChanged);
+    });
+  }
+
+  void _onJobChanged() {
+    final jobProvider = context.read<JobProvider>();
+    final currentJob = jobProvider.currentJob;
+
+    // Clear selected image when job is completed
+    if (currentJob != null && currentJob.isCompleted && _selectedImageBytes != null) {
+      setState(() {
+        _selectedImageBytes = null;
+        _selectedImageName = null;
+      });
+    }
   }
 
   @override
   void dispose() {
+    context.read<JobProvider>().removeListener(_onJobChanged);
     _promptController.dispose();
     super.dispose();
   }
@@ -117,11 +135,8 @@ class _EditorScreenState extends State<EditorScreen> {
       );
 
       if (mounted) {
-        // Clear the selected image after successful generation
-        setState(() {
-          _selectedImageBytes = null;
-          _selectedImageName = null;
-        });
+        // Clear prompt after job creation
+        // Note: _selectedImageBytes will be cleared when job completes (see _onJobChanged)
         _promptController.clear();
       }
     } catch (e) {
