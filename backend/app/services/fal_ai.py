@@ -1,6 +1,8 @@
 import os
 import base64
 from typing import Optional, Dict, Any
+from io import BytesIO
+from PIL import Image
 import fal_client
 from app.config import settings
 
@@ -34,6 +36,10 @@ class FalAIService:
             Exception: If API call fails
         """
         try:
+            # Get original image dimensions
+            image = Image.open(BytesIO(image_data))
+            width, height = image.size
+
             # Convert image to base64 data URI
             image_base64 = base64.b64encode(image_data).decode('utf-8')
             image_url = f"data:image/{image_format};base64,{image_base64}"
@@ -43,7 +49,11 @@ class FalAIService:
                 "prompt": prompt,
                 "image_urls": [image_url],
                 "num_images": 1,
-                "enable_safety_checker": True
+                "enable_safety_checker": True,
+                "image_size": {
+                    "width": width,
+                    "height": height
+                }
             }
 
             # Submit request to fal.ai using async API

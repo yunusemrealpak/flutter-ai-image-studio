@@ -114,71 +114,52 @@ class _EditorCanvasState extends State<EditorCanvas> {
 
   Widget _buildBeforeAfterComparison() {
     return Center(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // Calculate max dimensions to fit within available space
-          final maxWidth = constraints.maxWidth;
-          final maxHeight = constraints.maxHeight;
-
-          return ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: maxWidth * 0.9, // 90% of available width
-              maxHeight: maxHeight * 0.9, // 90% of available height
-            ),
-            child: BeforeAfter(
-              value: _value,
-              before: _buildComparisonImage(widget.beforeImageUrl!),
-              after: _buildComparisonImage(widget.imageUrl!),
-              trackWidth: 4,
-              trackColor: Colors.white,
-              thumbDecoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: AppTheme.dividerColor, width: 2),
-                shape: BoxShape.circle,
-              ),
-              onValueChanged: (value) {
-                setState(() {
-                  _value = value;
-                });
-              },
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildComparisonImage(String imageUrl) {
-    return SizedBox(
-      width: double.infinity,
-      height: double.infinity,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.surfaceDarker,
-          borderRadius: BorderRadius.circular(AppTheme.radiusM),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppTheme.radiusM),
-          child: Image.network(
-            imageUrl,
-            fit: BoxFit.contain, // Maintain aspect ratio without cropping
-            alignment: Alignment.center,
-            width: double.infinity,
-            height: double.infinity,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: AppTheme.surfaceDarker,
-                child: const Center(
-                  child: Icon(
-                    Icons.error_outline,
-                    color: AppTheme.iconColor,
-                    size: 48,
-                  ),
+      child: BeforeAfter(
+        value: _value,
+        before: Image.network(
+          widget.beforeImageUrl!,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: AppTheme.surfaceDarker,
+              child: const Center(
+                child: Icon(
+                  Icons.error_outline,
+                  color: AppTheme.iconColor,
+                  size: 48,
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
+        after: Image.network(
+          widget.imageUrl!,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: AppTheme.surfaceDarker,
+              child: const Center(
+                child: Icon(
+                  Icons.error_outline,
+                  color: AppTheme.iconColor,
+                  size: 48,
+                ),
+              ),
+            );
+          },
+        ),
+        trackWidth: 4,
+        trackColor: Colors.white,
+        thumbDecoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: AppTheme.dividerColor, width: 2),
+          shape: BoxShape.circle,
+        ),
+        onValueChanged: (value) {
+          setState(() {
+            _value = value;
+          });
+        },
       ),
     );
   }
