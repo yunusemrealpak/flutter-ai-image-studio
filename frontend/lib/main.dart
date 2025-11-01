@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/job_provider.dart';
@@ -16,11 +17,31 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => JobProvider(),
-      child: MaterialApp(
-        title: 'AI Image Editor',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
-        home: const EditorScreen(),
+      child: Builder(
+        builder: (context) {
+          final router = GoRouter(
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => const EditorScreen(),
+              ),
+              GoRoute(
+                path: '/job/:jobId',
+                builder: (context, state) {
+                  final jobId = state.pathParameters['jobId'];
+                  return EditorScreen(initialJobId: jobId);
+                },
+              ),
+            ],
+          );
+
+          return MaterialApp.router(
+            title: 'AI Image Editor',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.darkTheme,
+            routerConfig: router,
+          );
+        },
       ),
     );
   }

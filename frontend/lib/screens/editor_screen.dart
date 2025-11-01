@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/job.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
@@ -16,7 +17,9 @@ import '../widgets/recent_edits_bar.dart';
 
 /// Main editor screen with full layout
 class EditorScreen extends StatefulWidget {
-  const EditorScreen({super.key});
+  final String? initialJobId;
+
+  const EditorScreen({super.key, this.initialJobId});
 
   @override
   State<EditorScreen> createState() => _EditorScreenState();
@@ -35,7 +38,21 @@ class _EditorScreenState extends State<EditorScreen> {
     // Listen to job changes to clear selected image when job completes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<JobProvider>().addListener(_onJobChanged);
+
+      // If initialJobId is provided, load that job
+      if (widget.initialJobId != null) {
+        _loadInitialJob(widget.initialJobId!);
+      }
     });
+  }
+
+  Future<void> _loadInitialJob(String jobId) async {
+    final jobProvider = context.read<JobProvider>();
+    final job = jobProvider.jobs.firstWhere(
+      (j) => j.id == jobId,
+      orElse: () => jobProvider.jobs.first,
+    );
+    jobProvider.setCurrentJob(job);
   }
 
   void _onJobChanged() {
@@ -249,7 +266,8 @@ class _EditorScreenState extends State<EditorScreen> {
           jobs: completedJobs,
           selectedJob: jobProvider.currentJob,
           onJobSelected: (job) {
-            jobProvider.setCurrentJob(job);
+            // Navigate to job URL
+            context.go('/job/${job.id}');
           },
         );
       },

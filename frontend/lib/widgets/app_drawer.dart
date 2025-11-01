@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/job_provider.dart';
 import '../screens/settings_screen.dart';
 import '../theme/app_theme.dart';
@@ -15,7 +17,7 @@ class AppDrawer extends StatelessWidget {
       width: 320,
       child: Column(
         children: [
-          _buildHeader(),
+          _buildHeader(context),
           Expanded(child: _buildJobsList(context)),
           _buildSettingsButton(context),
         ],
@@ -23,7 +25,7 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacingXL),
       decoration: const BoxDecoration(
@@ -49,17 +51,18 @@ class AppDrawer extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
                 child: const Center(
-                  child: Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                  child: Icon(
+                    Icons.auto_awesome,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ),
               const SizedBox(width: AppTheme.spacingM),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'AI Image Editor',
-                    style: AppTheme.headingSmall,
-                  ),
+                  const Text('AI Image Editor', style: AppTheme.headingSmall),
                   const SizedBox(height: AppTheme.spacingXS),
                   Text(
                     'Your Projects',
@@ -72,19 +75,20 @@ class AppDrawer extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppTheme.spacingL),
-          _buildNewEditButton(),
+          _buildNewEditButton(context),
         ],
       ),
     );
   }
 
-  Widget _buildNewEditButton() {
+  Widget _buildNewEditButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () {
-          // Clear current job and close drawer
+          // Clear current job, navigate to home, and close drawer
           context.read<JobProvider>().clearCurrentJob();
+          context.go('/');
           Navigator.of(context).pop();
         },
         style: ElevatedButton.styleFrom(
@@ -102,10 +106,7 @@ class AppDrawer extends StatelessWidget {
         icon: const Icon(Icons.add, size: 18),
         label: const Text(
           'New Edit',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -134,9 +135,11 @@ class AppDrawer extends StatelessWidget {
               timestamp: job.createdAt,
               isSelected: isSelected,
               isCompleted: job.isCompleted,
+              jobId: job.id,
               onTap: () {
-                jobProvider.setCurrentJob(job);
-                Navigator.of(context).pop(); // Close drawer
+                // Navigate to job URL and close drawer
+                context.go('/job/${job.id}');
+                Navigator.of(context).pop();
               },
             );
           },
@@ -167,9 +170,7 @@ class AppDrawer extends StatelessWidget {
             const SizedBox(height: AppTheme.spacingS),
             Text(
               'Upload an image and generate your first edit',
-              style: AppTheme.bodySmall.copyWith(
-                color: AppTheme.textTertiary,
-              ),
+              style: AppTheme.bodySmall.copyWith(color: AppTheme.textTertiary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -185,6 +186,7 @@ class AppDrawer extends StatelessWidget {
     required DateTime timestamp,
     required bool isSelected,
     required bool isCompleted,
+    required String jobId,
     required VoidCallback onTap,
   }) {
     return InkWell(
@@ -254,8 +256,9 @@ class AppDrawer extends StatelessWidget {
                             color: isSelected
                                 ? AppTheme.primaryBlue
                                 : AppTheme.textPrimary,
-                            fontWeight:
-                                isSelected ? FontWeight.w600 : FontWeight.w500,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w500,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -293,9 +296,7 @@ class AppDrawer extends StatelessWidget {
   Widget _buildSettingsButton(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(color: AppTheme.dividerColor, width: 1),
-        ),
+        border: Border(top: BorderSide(color: AppTheme.dividerColor, width: 1)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -303,25 +304,16 @@ class AppDrawer extends StatelessWidget {
           onTap: () {
             Navigator.of(context).pop(); // Close drawer
             Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const SettingsScreen(),
-              ),
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
             );
           },
           child: Padding(
             padding: const EdgeInsets.all(AppTheme.spacingXL),
             child: Row(
               children: [
-                const Icon(
-                  Icons.settings,
-                  color: AppTheme.iconColor,
-                  size: 24,
-                ),
+                const Icon(Icons.settings, color: AppTheme.iconColor, size: 24),
                 const SizedBox(width: AppTheme.spacingL),
-                const Text(
-                  'Settings',
-                  style: AppTheme.bodyMedium,
-                ),
+                const Text('Settings', style: AppTheme.bodyMedium),
                 const Spacer(),
                 const Icon(
                   Icons.arrow_forward_ios,
