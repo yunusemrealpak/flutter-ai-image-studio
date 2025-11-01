@@ -1,0 +1,12 @@
+{
+  "buildCommand": "flutter build web --release --web-renderer canvaskit",
+  "outputDirectory": "build/web",
+  "installCommand": "if [ -e pubspec.yaml ]; then curl -fsSL https://deno.land/x/install/install.sh | sh && /vercel/.deno/bin/deno install -Afq --no-lock https://deno.land/x/setup_flutter@v0.0.3/main.ts && setup_flutter; fi",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
