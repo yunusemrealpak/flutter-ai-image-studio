@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +8,8 @@ import 'screens/editor_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
+  // Use path-based URL strategy (removes # from URLs)
+  usePathUrlStrategy();
   runApp(const MyApp());
 }
 
