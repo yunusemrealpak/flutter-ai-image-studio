@@ -23,7 +23,10 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for development
+    allow_origins=[
+        "https://flutter-ai-image-studio.web.app",  # Production frontend
+    ],
+    allow_origin_regex=r"http://localhost:\d+",  # Development (all localhost ports)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
