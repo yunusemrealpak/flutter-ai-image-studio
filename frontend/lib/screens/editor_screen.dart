@@ -49,6 +49,21 @@ class _EditorScreenState extends State<EditorScreen> {
     });
   }
 
+  @override
+  void didUpdateWidget(EditorScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // If initialJobId changed, load the new job
+    if (widget.initialJobId != oldWidget.initialJobId) {
+      if (widget.initialJobId != null) {
+        _loadInitialJob(widget.initialJobId!);
+      } else {
+        // If initialJobId is null, clear current job
+        context.read<JobProvider>().clearCurrentJob();
+      }
+    }
+  }
+
   Future<void> _loadInitialJob(String jobId) async {
     final jobProvider = context.read<JobProvider>();
 
