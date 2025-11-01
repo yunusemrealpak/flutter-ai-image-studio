@@ -58,37 +58,33 @@ class FalAIService:
                 }
             }
 
-            # Submit request and get handle for progress tracking
-            handle = await fal_client.submit_async(
-                "fal-ai/bytedance/seedream/v4/edit",
-                arguments=arguments
-            )
-
             # Report initial progress
             if on_progress:
                 on_progress(10)
 
-            # Subscribe to status updates
-            async for event in fal_client.stream_async(handle):
-                # Check event type and update progress
-                if isinstance(event, dict):
-                    # Extract progress from logs if available
-                    if "logs" in event:
-                        logs = event["logs"]
-                        if logs:
-                            # Estimate progress based on log messages
-                            if "Downloading" in str(logs[-1]):
-                                if on_progress:
-                                    on_progress(30)
-                            elif "Processing" in str(logs[-1]):
-                                if on_progress:
-                                    on_progress(50)
-                            elif "Generating" in str(logs[-1]):
-                                if on_progress:
-                                    on_progress(70)
+            # Use run_async for simplicity (blocks until completion)
+            # Progress updates will be simulated based on estimated time
+            import asyncio
 
-            # Get final result
-            result = await fal_client.result_async(handle)
+            # Start the API call
+            result_task = asyncio.create_task(
+                fal_client.run_async(
+                    "fal-ai/bytedance/seedream/v4/edit",
+                    arguments=arguments
+                )
+            )
+
+            # Simulate progress while waiting (since fal.ai doesn't provide real-time progress)
+            progress_values = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+            for progress_val in progress_values:
+                if result_task.done():
+                    break
+                if on_progress:
+                    on_progress(progress_val)
+                await asyncio.sleep(2)  # Update progress every 2 seconds
+
+            # Wait for result
+            result = await result_task
 
             # Report completion
             if on_progress:
