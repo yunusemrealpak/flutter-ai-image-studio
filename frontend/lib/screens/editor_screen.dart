@@ -25,6 +25,7 @@ class _EditorScreenState extends State<EditorScreen> {
   final TextEditingController _promptController = TextEditingController();
   Uint8List? _selectedImageBytes;
   String? _selectedImageName;
+  Job? _previousJob; // Track previous job state
 
   @override
   void initState() {
@@ -40,17 +41,31 @@ class _EditorScreenState extends State<EditorScreen> {
     final jobProvider = context.read<JobProvider>();
     final currentJob = jobProvider.currentJob;
 
-    // Clear selected image when:
-    // 1. Job is completed
-    // 2. Current job is cleared (New Edit button)
+    // Only clear when state transitions occur, not on every change
     if (_selectedImageBytes != null) {
-      if (currentJob == null || currentJob.isCompleted) {
+      // Case 1: Job transitioned from PROCESSING to COMPLETED
+      if (_previousJob != null &&
+          _previousJob!.isProcessing &&
+          currentJob != null &&
+          currentJob.id == _previousJob!.id &&
+          currentJob.isCompleted) {
+        setState(() {
+          _selectedImageBytes = null;
+          _selectedImageName = null;
+        });
+      }
+
+      // Case 2: Job was cleared (New Edit button)
+      else if (_previousJob != null && currentJob == null) {
         setState(() {
           _selectedImageBytes = null;
           _selectedImageName = null;
         });
       }
     }
+
+    // Update previous job
+    _previousJob = currentJob;
   }
 
   @override
