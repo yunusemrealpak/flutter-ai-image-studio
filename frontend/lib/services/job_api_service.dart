@@ -1,14 +1,18 @@
+import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
-import 'dart:convert';
+
 import '../models/job.dart';
 
 /// API service for job management
 class JobApiService {
   final String baseUrl;
 
-  JobApiService({this.baseUrl = 'https://flutter-ai-image-studio.onrender.com'});
+  JobApiService({
+    this.baseUrl = 'https://flutter-ai-image-studio.onrender.com',
+  });
 
   /// Helper to get MIME type from filename
   String _getMimeType(String filename) {

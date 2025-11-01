@@ -46,29 +46,10 @@ class _EditorCanvasState extends State<EditorCanvas> {
       padding: const EdgeInsets.all(AppTheme.spacingXXL),
       child: Column(
         children: [
-          _buildHeader(),
           const SizedBox(height: AppTheme.spacingL),
           Expanded(child: _buildImagePreview()),
         ],
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text('', style: AppTheme.headingMedium),
-        _buildHeaderMenu(),
-      ],
-    );
-  }
-
-  Widget _buildHeaderMenu() {
-    return IconButton(
-      icon: const Icon(Icons.more_vert, color: AppTheme.iconColor, size: 20),
-      onPressed: () {},
-      tooltip: 'More options',
     );
   }
 
@@ -498,11 +479,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
               ),
             ],
           ),
-          child: const Icon(
-            Icons.close,
-            color: Colors.white,
-            size: 20,
-          ),
+          child: const Icon(Icons.close, color: Colors.white, size: 20),
         ),
       ),
     );

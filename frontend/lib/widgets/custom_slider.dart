@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_theme.dart';
 
 /// Custom slider widget for adjustment controls
@@ -11,14 +12,14 @@ class CustomSlider extends StatelessWidget {
   final int? divisions;
 
   const CustomSlider({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     this.min = 0.0,
     this.max = 100.0,
     required this.onChanged,
     this.divisions,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,15 +42,11 @@ class CustomSlider extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTheme.bodySmall.copyWith(
-            color: AppTheme.textSecondary,
-          ),
+          style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
         ),
         Text(
           value.toStringAsFixed(2),
-          style: AppTheme.bodySmall.copyWith(
-            color: AppTheme.textSecondary,
-          ),
+          style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
         ),
       ],
     );
@@ -89,7 +86,7 @@ class DropdownSlider extends StatelessWidget {
   final ValueChanged<double> onSliderChanged;
 
   const DropdownSlider({
-    Key? key,
+    super.key,
     required this.label,
     required this.dropdownValue,
     required this.dropdownOptions,
@@ -98,7 +95,7 @@ class DropdownSlider extends StatelessWidget {
     this.max = 100.0,
     required this.onDropdownChanged,
     required this.onSliderChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -127,9 +124,7 @@ class DropdownSlider extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTheme.bodySmall.copyWith(
-            color: AppTheme.textSecondary,
-          ),
+          style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
         ),
         _buildDropdown(),
       ],
@@ -153,15 +148,17 @@ class DropdownSlider extends StatelessWidget {
           if (value != null) onDropdownChanged(value);
         },
         items: dropdownOptions
-            .map((option) => DropdownMenuItem(
-                  value: option,
-                  child: Text(
-                    option,
-                    style: AppTheme.bodySmall.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+            .map(
+              (option) => DropdownMenuItem(
+                value: option,
+                child: Text(
+                  option,
+                  style: AppTheme.bodySmall.copyWith(
+                    color: AppTheme.textSecondary,
                   ),
-                ))
+                ),
+              ),
+            )
             .toList(),
         underline: const SizedBox.shrink(),
         icon: const Icon(

@@ -340,7 +340,23 @@ Backend automatically creates `jobs.db` on first run.
 
 ### Frontend (Firebase Hosting)
 
+**First Time Setup:**
 ```bash
+# Install Firebase CLI
+npm install -g firebase-tools
+
+# Login to Firebase
+firebase login
+
+# (Optional) If deploying to your own Firebase project:
+# Create a new Firebase project and update .firebaserc with your project ID
+```
+
+**Deploy:**
+```bash
+# Navigate to frontend directory
+cd frontend
+
 # Build production app
 flutter build web --release
 
@@ -348,7 +364,9 @@ flutter build web --release
 firebase deploy --only hosting
 ```
 
-**Note:** Update `baseUrl` in `job_api_service.dart` to production backend URL before building.
+**Notes:**
+- Update `baseUrl` in `lib/services/job_api_service.dart` to production backend URL before building
+- Current `.firebaserc` points to `flutter-ai-image-studio` - update if using your own project
 
 ## 📄 License
 

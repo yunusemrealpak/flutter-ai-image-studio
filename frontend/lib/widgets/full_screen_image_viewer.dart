@@ -1,5 +1,7 @@
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+
 import '../theme/app_theme.dart';
 
 /// Full screen image viewer
@@ -7,11 +9,7 @@ class FullScreenImageViewer extends StatelessWidget {
   final String? imageUrl;
   final Uint8List? imageBytes;
 
-  const FullScreenImageViewer({
-    super.key,
-    this.imageUrl,
-    this.imageBytes,
-  });
+  const FullScreenImageViewer({super.key, this.imageUrl, this.imageBytes});
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +18,7 @@ class FullScreenImageViewer extends StatelessWidget {
       body: Stack(
         children: [
           // Full screen image
-          Center(
-            child: _buildImage(),
-          ),
+          Center(child: _buildImage()),
           // Close button
           Positioned(
             top: AppTheme.spacingXL,
@@ -44,10 +40,7 @@ class FullScreenImageViewer extends StatelessWidget {
 
   Widget _buildImage() {
     if (imageBytes != null) {
-      return Image.memory(
-        imageBytes!,
-        fit: BoxFit.contain,
-      );
+      return Image.memory(imageBytes!, fit: BoxFit.contain);
     } else if (imageUrl != null) {
       return Image.network(
         imageUrl!,

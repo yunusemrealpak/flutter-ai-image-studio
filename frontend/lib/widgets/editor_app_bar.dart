@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/job_provider.dart';
 import '../theme/app_theme.dart';
 
@@ -8,10 +9,7 @@ import '../theme/app_theme.dart';
 class EditorAppBar extends StatelessWidget {
   final VoidCallback? onMenuTap;
 
-  const EditorAppBar({
-    Key? key,
-    this.onMenuTap,
-  }) : super(key: key);
+  const EditorAppBar({super.key, this.onMenuTap});
 
   @override
   Widget build(BuildContext context) {

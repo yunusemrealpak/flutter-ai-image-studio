@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_theme.dart';
 
 /// Prompt input bar for AI image generation
@@ -11,14 +12,14 @@ class PromptInputBar extends StatefulWidget {
   final VoidCallback? onGenerate;
 
   const PromptInputBar({
-    Key? key,
+    super.key,
     required this.controller,
     this.isLoading = false,
     this.progress = 0,
     this.hasImage = false,
     this.isEditingExisting = false,
     this.onGenerate,
-  }) : super(key: key);
+  });
 
   @override
   State<PromptInputBar> createState() => _PromptInputBarState();
@@ -42,15 +43,11 @@ class _PromptInputBarState extends State<PromptInputBar> {
       ),
       decoration: const BoxDecoration(
         color: AppTheme.surfaceDark,
-        border: Border(
-          top: BorderSide(color: AppTheme.dividerColor, width: 1),
-        ),
+        border: Border(top: BorderSide(color: AppTheme.dividerColor, width: 1)),
       ),
       child: Row(
         children: [
-          Expanded(
-            child: _buildPromptInput(),
-          ),
+          Expanded(child: _buildPromptInput()),
           const SizedBox(width: AppTheme.spacingL),
           _buildGenerateButton(),
         ],
@@ -60,9 +57,7 @@ class _PromptInputBarState extends State<PromptInputBar> {
 
   Widget _buildPromptInput() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.spacingL,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingL),
       decoration: BoxDecoration(
         color: AppTheme.surfaceDarker,
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
@@ -81,18 +76,14 @@ class _PromptInputBarState extends State<PromptInputBar> {
         style: AppTheme.bodyMedium,
         decoration: InputDecoration(
           hintText: _getHintText(),
-          hintStyle: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.textTertiary,
-          ),
+          hintStyle: AppTheme.bodyMedium.copyWith(color: AppTheme.textTertiary),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             vertical: AppTheme.spacingM,
           ),
           prefixIcon: Icon(
             Icons.edit_outlined,
-            color: widget.hasImage
-                ? AppTheme.iconColor
-                : AppTheme.textTertiary,
+            color: widget.hasImage ? AppTheme.iconColor : AppTheme.textTertiary,
             size: 20,
           ),
         ),
@@ -102,7 +93,8 @@ class _PromptInputBarState extends State<PromptInputBar> {
   }
 
   Widget _buildGenerateButton() {
-    final bool canGenerate = widget.hasImage &&
+    final bool canGenerate =
+        widget.hasImage &&
         widget.controller.text.trim().isNotEmpty &&
         !widget.isLoading;
 
@@ -120,9 +112,7 @@ class _PromptInputBarState extends State<PromptInputBar> {
           disabledBackgroundColor: AppTheme.surfaceDarker,
           disabledForegroundColor: AppTheme.textTertiary,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTheme.spacingXXL,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingXXL),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+
 import '../models/job.dart';
+import '../theme/app_theme.dart';
 
 /// Bottom bar showing recent edit thumbnails
 class RecentEditsBar extends StatelessWidget {
@@ -9,11 +10,11 @@ class RecentEditsBar extends StatelessWidget {
   final ValueChanged<Job>? onJobSelected;
 
   const RecentEditsBar({
-    Key? key,
+    super.key,
     required this.jobs,
     this.selectedJob,
     this.onJobSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,19 +30,14 @@ class RecentEditsBar extends StatelessWidget {
         children: [
           _buildHeader(),
           const SizedBox(height: AppTheme.spacingM),
-          Expanded(
-            child: _buildThumbnailList(),
-          ),
+          Expanded(child: _buildThumbnailList()),
         ],
       ),
     );
   }
 
   Widget _buildHeader() {
-    return const Text(
-      'Recent Edits',
-      style: AppTheme.headingMedium,
-    );
+    return const Text('Recent Edits', style: AppTheme.headingMedium);
   }
 
   Widget _buildThumbnailList() {
@@ -71,9 +67,7 @@ class RecentEditsBar extends StatelessWidget {
     return Center(
       child: Text(
         'No recent edits',
-        style: AppTheme.bodySmall.copyWith(
-          color: AppTheme.textTertiary,
-        ),
+        style: AppTheme.bodySmall.copyWith(color: AppTheme.textTertiary),
       ),
     );
   }
@@ -137,11 +131,7 @@ class _RecentEditThumbnail extends StatelessWidget {
     return Container(
       color: AppTheme.surfaceDark,
       child: const Center(
-        child: Icon(
-          Icons.image_outlined,
-          color: AppTheme.iconColor,
-          size: 32,
-        ),
+        child: Icon(Icons.image_outlined, color: AppTheme.iconColor, size: 32),
       ),
     );
   }
