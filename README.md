@@ -78,8 +78,9 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Create .env file
+# Create .env file with your fal.ai API key
 echo "FAL_KEY=your_fal_ai_api_key_here" > .env
+# Note: Only FAL_KEY is required. PORT, HOST, ENVIRONMENT have defaults.
 
 # Run server (creates jobs.db automatically)
 python -m app.main
