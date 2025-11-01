@@ -3,14 +3,10 @@ import '../theme/app_theme.dart';
 
 /// Top application bar for the editor
 class EditorAppBar extends StatelessWidget {
-  final VoidCallback? onSaveExport;
-  final VoidCallback? onShare;
   final VoidCallback? onMenuTap;
 
   const EditorAppBar({
     Key? key,
-    this.onSaveExport,
-    this.onShare,
     this.onMenuTap,
   }) : super(key: key);
 
@@ -31,7 +27,6 @@ class EditorAppBar extends StatelessWidget {
           const SizedBox(width: AppTheme.spacingXXL),
           _buildUserProfile(),
           const Spacer(),
-          _buildActionButtons(),
         ],
       ),
     );
@@ -106,64 +101,6 @@ class EditorAppBar extends StatelessWidget {
           style: AppTheme.bodySmall,
         ),
       ],
-    );
-  }
-
-  Widget _buildActionButtons() {
-    return Row(
-      children: [
-        _ShareButton(onTap: onShare),
-        const SizedBox(width: AppTheme.spacingM),
-        _SaveExportButton(onTap: onSaveExport),
-      ],
-    );
-  }
-}
-
-/// Share button component
-class _ShareButton extends StatelessWidget {
-  final VoidCallback? onTap;
-
-  const _ShareButton({this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onTap,
-      style: TextButton.styleFrom(
-        foregroundColor: AppTheme.textPrimary,
-        backgroundColor: Colors.transparent,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.spacingL,
-          vertical: AppTheme.spacingM,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusM),
-        ),
-      ),
-      child: const Text(
-        'Share',
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}
-
-/// Save/Export button component
-class _SaveExportButton extends StatelessWidget {
-  final VoidCallback? onTap;
-
-  const _SaveExportButton({this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onTap,
-      style: AppTheme.primaryButtonStyle,
-      child: const Text('Save / Export'),
     );
   }
 }

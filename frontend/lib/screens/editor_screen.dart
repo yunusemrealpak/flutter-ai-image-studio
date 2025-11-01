@@ -9,7 +9,6 @@ import '../theme/app_theme.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/editor_app_bar.dart';
 import '../widgets/editor_canvas.dart';
-import '../widgets/editor_settings_panel.dart';
 import '../widgets/recent_edits_bar.dart';
 import '../widgets/prompt_input_bar.dart';
 
@@ -50,24 +49,6 @@ class _EditorScreenState extends State<EditorScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message), backgroundColor: Colors.red),
-      );
-    }
-  }
-
-  void _handleSaveExport() {
-    // TODO: Implement save/export functionality
-    _showInfo('Save/Export functionality coming soon');
-  }
-
-  void _handleShare() {
-    // TODO: Implement share functionality
-    _showInfo('Share functionality coming soon');
-  }
-
-  void _showInfo(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: AppTheme.primaryBlue),
       );
     }
   }
@@ -166,22 +147,13 @@ class _EditorScreenState extends State<EditorScreen> {
         builder: (context) => Column(
           children: [
             EditorAppBar(
-              onSaveExport: _handleSaveExport,
-              onShare: _handleShare,
               onMenuTap: () => Scaffold.of(context).openDrawer(),
             ),
             Expanded(
-              child: Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Expanded(child: _buildMainContent()),
-                        _buildPromptInputBar(),
-                      ],
-                    ),
-                  ),
-                  const EditorSettingsPanel(),
+                  Expanded(child: _buildMainContent()),
+                  _buildPromptInputBar(),
                 ],
               ),
             ),
