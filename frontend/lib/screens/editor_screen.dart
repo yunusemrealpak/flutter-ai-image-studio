@@ -242,16 +242,62 @@ class _EditorScreenState extends State<EditorScreen> {
         final isProcessing = currentJob?.isProcessing ?? false;
         final progress = currentJob?.progress ?? 0;
 
-        return EditorCanvas(
-          imageUrl: currentJob?.editedImageUrl,
-          beforeImageUrl: currentJob?.originalImageUrl,
-          selectedImageBytes: _selectedImageBytes,
-          isProcessing: isProcessing,
-          progress: progress,
-          onImagePick: _handleImagePick,
-          currentPrompt: currentJob?.prompt,
+        return Column(
+          children: [
+            Expanded(
+              child: EditorCanvas(
+                imageUrl: currentJob?.editedImageUrl,
+                beforeImageUrl: currentJob?.originalImageUrl,
+                selectedImageBytes: _selectedImageBytes,
+                isProcessing: isProcessing,
+                progress: progress,
+                onImagePick: _handleImagePick,
+              ),
+            ),
+            // Show the prompt used for the current job
+            if (currentJob != null && currentJob.prompt.isNotEmpty)
+              _buildUsedPromptDisplay(currentJob.prompt),
+          ],
         );
       },
+    );
+  }
+
+  Widget _buildUsedPromptDisplay(String prompt) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingXL,
+        vertical: AppTheme.spacingL,
+      ),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryBlue.withOpacity(0.08),
+        border: const Border(
+          top: BorderSide(color: AppTheme.primaryBlue, width: 1.5),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.auto_awesome,
+            size: 20,
+            color: AppTheme.primaryBlue,
+          ),
+          const SizedBox(width: AppTheme.spacingM),
+          Expanded(
+            child: Text(
+              prompt,
+              style: AppTheme.bodyMedium.copyWith(
+                fontStyle: FontStyle.italic,
+                color: AppTheme.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
