@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
+
 import '../theme/app_theme.dart';
 
 /// Main canvas area for image editing
 class EditorCanvas extends StatefulWidget {
   final String? imageUrl;
   final String? beforeImageUrl;
+  final Uint8List? selectedImageBytes;
+  final VoidCallback? onImagePick;
 
   const EditorCanvas({
-    Key? key,
+    super.key,
     this.imageUrl,
     this.beforeImageUrl,
-  }) : super(key: key);
+    this.selectedImageBytes,
+    this.onImagePick,
+  });
 
   @override
   State<EditorCanvas> createState() => _EditorCanvasState();
@@ -29,9 +35,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
         children: [
           _buildHeader(),
           const SizedBox(height: AppTheme.spacingL),
-          Expanded(
-            child: _buildImagePreview(),
-          ),
+          Expanded(child: _buildImagePreview()),
         ],
       ),
     );
@@ -41,10 +45,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          'Greseel.raw',
-          style: AppTheme.headingMedium,
-        ),
+        const Text('Greseel.raw', style: AppTheme.headingMedium),
         _buildHeaderMenu(),
       ],
     );
@@ -52,11 +53,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
 
   Widget _buildHeaderMenu() {
     return IconButton(
-      icon: const Icon(
-        Icons.more_vert,
-        color: AppTheme.iconColor,
-        size: 20,
-      ),
+      icon: const Icon(Icons.more_vert, color: AppTheme.iconColor, size: 20),
       onPressed: () {},
       tooltip: 'More options',
     );
@@ -97,7 +94,15 @@ class _EditorCanvasState extends State<EditorCanvas> {
   }
 
   Widget _buildImageOrPlaceholder() {
-    if (widget.imageUrl != null) {
+    // Priority: selectedImageBytes > imageUrl > placeholder
+    if (widget.selectedImageBytes != null) {
+      return Center(
+        child: Image.memory(
+          widget.selectedImageBytes!,
+          fit: BoxFit.contain,
+        ),
+      );
+    } else if (widget.imageUrl != null) {
       return Center(
         child: Image.network(
           widget.imageUrl!,
@@ -112,23 +117,47 @@ class _EditorCanvasState extends State<EditorCanvas> {
   }
 
   Widget _buildPlaceholder() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.image_outlined,
-            size: 80,
-            color: AppTheme.iconColor.withOpacity(0.3),
-          ),
-          const SizedBox(height: AppTheme.spacingL),
-          Text(
-            'No image loaded',
-            style: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.textSecondary,
+    return InkWell(
+      onTap: widget.onImagePick,
+      borderRadius: BorderRadius.circular(AppTheme.radiusXL),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceDarker,
+                borderRadius: BorderRadius.circular(AppTheme.radiusXL),
+                border: Border.all(
+                  color: AppTheme.dividerColor,
+                  width: 2,
+                  style: BorderStyle.solid,
+                ),
+              ),
+              child: Icon(
+                Icons.add_photo_alternate_outlined,
+                size: 48,
+                color: AppTheme.iconColor.withOpacity(0.5),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: AppTheme.spacingXXL),
+            Text(
+              'Click to upload an image',
+              style: AppTheme.headingSmall.copyWith(
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppTheme.spacingS),
+            Text(
+              'Supported formats: PNG, JPG, WEBP',
+              style: AppTheme.bodySmall.copyWith(
+                color: AppTheme.textTertiary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -138,9 +167,9 @@ class _EditorCanvasState extends State<EditorCanvas> {
       child: GestureDetector(
         onHorizontalDragUpdate: (details) {
           setState(() {
-            _compareSliderPosition = (details.localPosition.dx /
-                MediaQuery.of(context).size.width)
-                .clamp(0.0, 1.0);
+            _compareSliderPosition =
+                (details.localPosition.dx / MediaQuery.of(context).size.width)
+                    .clamp(0.0, 1.0);
           });
         },
         child: Stack(
@@ -197,11 +226,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
           color: AppTheme.primaryBlue,
           borderRadius: BorderRadius.circular(AppTheme.radiusL),
         ),
-        child: const Icon(
-          Icons.compare,
-          color: Colors.white,
-          size: 24,
-        ),
+        child: const Icon(Icons.compare, color: Colors.white, size: 24),
       ),
     );
   }
@@ -255,11 +280,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
       borderRadius: BorderRadius.circular(AppTheme.radiusS),
       child: Padding(
         padding: const EdgeInsets.all(AppTheme.spacingXS),
-        child: Icon(
-          icon,
-          color: AppTheme.iconColor,
-          size: 20,
-        ),
+        child: Icon(icon, color: AppTheme.iconColor, size: 20),
       ),
     );
   }
@@ -276,17 +297,11 @@ class _EditorCanvasState extends State<EditorCanvas> {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.add,
-            size: 12,
-            color: AppTheme.textSecondary,
-          ),
+          const Icon(Icons.add, size: 12, color: AppTheme.textSecondary),
           const SizedBox(width: AppTheme.spacingXS),
           Text(
             '${_zoomLevel.toInt()}%',
-            style: AppTheme.bodySmall.copyWith(
-              color: AppTheme.textSecondary,
-            ),
+            style: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
           ),
         ],
       ),
@@ -294,11 +309,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
   }
 
   Widget _buildToolbarDivider() {
-    return Container(
-      width: 1,
-      height: 20,
-      color: AppTheme.dividerColor,
-    );
+    return Container(width: 1, height: 20, color: AppTheme.dividerColor);
   }
 }
 
