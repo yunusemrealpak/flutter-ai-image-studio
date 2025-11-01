@@ -309,9 +309,11 @@ class _EditorScreenState extends State<EditorScreen> {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
         final hasNewImage = _selectedImageBytes != null;
-        final hasExistingImage = jobProvider.currentJob?.editedImageUrl != null;
-        final isEditingExisting = hasExistingImage && !hasNewImage;
         final currentJob = jobProvider.currentJob;
+        final hasExistingImage = currentJob != null &&
+            (currentJob.editedImageUrl != null ||
+                currentJob.originalImageUrl.isNotEmpty);
+        final isEditingExisting = hasExistingImage && !hasNewImage;
         final isProcessing = currentJob?.isProcessing ?? false;
         final progress = currentJob?.progress ?? 0;
 
