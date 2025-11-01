@@ -84,7 +84,10 @@ class _EditorCanvasState extends State<EditorCanvas> {
             _buildImageOrPlaceholder(),
 
             // Processing overlay (blur + animation)
-            if (widget.isProcessing && widget.selectedImageBytes != null)
+            // Show when processing and we have an image to show (either new upload or existing job)
+            if (widget.isProcessing &&
+                (widget.selectedImageBytes != null ||
+                    widget.beforeImageUrl != null))
               _buildProcessingOverlay(),
 
             // Before/After toggle button (only show when both images available)
@@ -470,83 +473,35 @@ class _EditorCanvasState extends State<EditorCanvas> {
         child: Container(
           color: Colors.black.withOpacity(0.3),
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // AI Processing Animation
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryBlue.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Rotating circle
-                      SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            AppTheme.primaryBlue,
-                          ),
-                        ),
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppTheme.primaryBlue.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Rotating circle
+                  SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppTheme.primaryBlue,
                       ),
-                      // AI Icon
-                      const Icon(
-                        Icons.auto_awesome,
-                        size: 48,
-                        color: AppTheme.primaryBlue,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppTheme.spacingXL),
-                // Progress text
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacingXL,
-                    vertical: AppTheme.spacingL,
+                  // AI Icon
+                  const Icon(
+                    Icons.auto_awesome,
+                    size: 48,
+                    color: AppTheme.primaryBlue,
                   ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceDarker.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusL),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'AI is enhancing your image',
-                        style: AppTheme.headingSmall.copyWith(
-                          color: AppTheme.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: AppTheme.spacingM),
-                      Text(
-                        '${widget.progress}% Complete',
-                        style: AppTheme.bodyLarge.copyWith(
-                          color: AppTheme.primaryBlue,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: AppTheme.spacingM),
-                      // Progress bar
-                      SizedBox(
-                        width: 200,
-                        child: LinearProgressIndicator(
-                          value: widget.progress / 100,
-                          backgroundColor: AppTheme.dividerColor,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            AppTheme.primaryBlue,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
