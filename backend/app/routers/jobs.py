@@ -62,7 +62,7 @@ async def get_job(job_id: str):
     Returns:
         Job details
     """
-    job = job_service.get_job(job_id)
+    job = await job_service.get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
     return job
@@ -76,7 +76,7 @@ async def list_jobs():
     Returns:
         List of all jobs, newest first
     """
-    jobs = job_service.get_all_jobs()
+    jobs = await job_service.get_all_jobs()
     return jobs
 
 
@@ -91,7 +91,7 @@ async def delete_job(job_id: str):
     Returns:
         Success message
     """
-    deleted = job_service.delete_job(job_id)
+    deleted = await job_service.delete_job(job_id)
     if not deleted:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
     return {"message": f"Job {job_id} deleted successfully"}

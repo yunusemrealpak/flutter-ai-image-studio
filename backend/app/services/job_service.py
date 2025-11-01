@@ -60,8 +60,8 @@ class JobService:
             progress=0
         )
 
-        # Store job
-        job_store.create_job(job)
+        # Store job in database
+        await job_store.create_job(job)
 
         # Return job immediately - processing will happen in background
         return job
@@ -73,7 +73,7 @@ class JobService:
         Args:
             job_id: Job ID to process
         """
-        job = job_store.get_job(job_id)
+        job = await job_store.get_job(job_id)
         if not job:
             return
 
@@ -84,10 +84,10 @@ class JobService:
             )
 
             # Progress callback to update job progress
-            def update_progress(progress: int):
+            async def update_progress(progress: int):
                 job.progress = progress
                 job.updated_at = datetime.utcnow()
-                job_store.update_job(job)
+                await job_store.update_job(job)
 
             # Call fal.ai to edit image with progress tracking
             result = await fal_ai_service.edit_image(
@@ -103,26 +103,26 @@ class JobService:
             job.edited_image_url = result["images"][0]["url"]
             job.updated_at = datetime.utcnow()
 
-            job_store.update_job(job)
+            await job_store.update_job(job)
 
         except Exception as e:
             # Mark job as failed
             job.status = JobStatus.FAILED
             job.error_message = str(e)
             job.updated_at = datetime.utcnow()
-            job_store.update_job(job)
+            await job_store.update_job(job)
 
-    def get_job(self, job_id: str) -> Optional[Job]:
+    async def get_job(self, job_id: str) -> Optional[Job]:
         """Get job by ID"""
-        return job_store.get_job(job_id)
+        return await job_store.get_job(job_id)
 
-    def get_all_jobs(self) -> List[Job]:
+    async def get_all_jobs(self) -> List[Job]:
         """Get all jobs"""
-        return job_store.get_all_jobs()
+        return await job_store.get_all_jobs()
 
-    def delete_job(self, job_id: str) -> bool:
+    async def delete_job(self, job_id: str) -> bool:
         """Delete a job"""
-        return job_store.delete_job(job_id)
+        return await job_store.delete_job(job_id)
 
 
 # Singleton instance

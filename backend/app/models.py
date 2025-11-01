@@ -3,6 +3,8 @@ from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field
 from uuid import uuid4
+from sqlalchemy import Column, String, Integer, DateTime, Enum as SQLEnum
+from .database import Base
 
 
 class JobStatus(str, Enum):
@@ -11,6 +13,22 @@ class JobStatus(str, Enum):
     PROCESSING = "processing"
     COMPLETED = "completed"
     FAILED = "failed"
+
+
+# SQLAlchemy Database Model
+class JobDB(Base):
+    """SQLAlchemy model for Job table"""
+    __tablename__ = "jobs"
+
+    id = Column(String, primary_key=True, index=True)
+    original_image_url = Column(String, nullable=False)
+    edited_image_url = Column(String, nullable=True)
+    prompt = Column(String(1000), nullable=False)
+    status = Column(SQLEnum(JobStatus), default=JobStatus.PENDING, nullable=False)
+    progress = Column(Integer, default=0, nullable=False)
+    error_message = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
 
 class Job(BaseModel):

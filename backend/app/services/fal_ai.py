@@ -20,7 +20,7 @@ class FalAIService:
         image_data: bytes,
         prompt: str,
         image_format: str = "png",
-        on_progress: Optional[Callable[[int], None]] = None
+        on_progress: Optional[Callable[[int], Any]] = None
     ) -> Dict[str, Any]:
         """
         Edit an image using fal.ai's Seedream v4 model with progress tracking
@@ -60,7 +60,9 @@ class FalAIService:
 
             # Report initial progress
             if on_progress:
-                on_progress(10)
+                result = on_progress(10)
+                if asyncio.iscoroutine(result):
+                    await result
 
             # Use run_async for simplicity (blocks until completion)
             # Progress updates will be simulated based on estimated time
@@ -80,17 +82,21 @@ class FalAIService:
                 if result_task.done():
                     break
                 if on_progress:
-                    on_progress(progress_val)
+                    result = on_progress(progress_val)
+                    if asyncio.iscoroutine(result):
+                        await result
                 await asyncio.sleep(2)  # Update progress every 2 seconds
 
             # Wait for result
-            result = await result_task
+            api_result = await result_task
 
             # Report completion
             if on_progress:
-                on_progress(100)
+                result = on_progress(100)
+                if asyncio.iscoroutine(result):
+                    await result
 
-            return result
+            return api_result
 
         except Exception as e:
             raise Exception(f"Failed to edit image with fal.ai: {str(e)}")
