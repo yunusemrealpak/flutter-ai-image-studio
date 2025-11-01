@@ -17,7 +17,7 @@ class EditorCanvas extends StatefulWidget {
   final bool isProcessing;
   final int progress;
   final VoidCallback? onImagePick;
-  final String? currentPrompt;
+  final VoidCallback? onImageRemove;
 
   const EditorCanvas({
     super.key,
@@ -27,7 +27,7 @@ class EditorCanvas extends StatefulWidget {
     this.isProcessing = false,
     this.progress = 0,
     this.onImagePick,
-    this.currentPrompt,
+    this.onImageRemove,
   });
 
   @override
@@ -93,25 +93,22 @@ class _EditorCanvasState extends State<EditorCanvas> {
                     widget.imageUrl != null))
               _buildProcessingOverlay(),
 
+            // Remove image button (only for newly selected images)
+            if (widget.selectedImageBytes != null &&
+                !widget.isProcessing &&
+                widget.onImageRemove != null)
+              Positioned(
+                top: AppTheme.spacingL,
+                right: AppTheme.spacingL,
+                child: _buildRemoveImageButton(),
+              ),
+
             // Before/After toggle button (only show when both images available)
             if (widget.beforeImageUrl != null && widget.imageUrl != null)
               Positioned(
                 top: AppTheme.spacingL,
                 right: AppTheme.spacingL,
                 child: _buildBeforeAfterToggle(),
-              ),
-
-            // Prompt display (show when we have a prompt and an image)
-            if (widget.currentPrompt != null &&
-                widget.currentPrompt!.isNotEmpty &&
-                (widget.imageUrl != null ||
-                    widget.beforeImageUrl != null ||
-                    widget.selectedImageBytes != null))
-              Positioned(
-                bottom: AppTheme.spacingXL * 3,
-                left: 0,
-                right: 0,
-                child: _buildPromptDisplay(),
               ),
 
             // Bottom toolbar
@@ -321,57 +318,6 @@ class _EditorCanvasState extends State<EditorCanvas> {
     );
   }
 
-  Widget _buildPromptDisplay() {
-    return Center(
-      child: FractionallySizedBox(
-        widthFactor: 0.7, // 70% width
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTheme.spacingL,
-            vertical: AppTheme.spacingM,
-          ),
-          decoration: BoxDecoration(
-            color: AppTheme.surfaceDark.withOpacity(0.95),
-            borderRadius: BorderRadius.circular(AppTheme.radiusL),
-            border: Border.all(
-              color: AppTheme.primaryBlue.withOpacity(0.3),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.auto_awesome,
-                size: 18,
-                color: AppTheme.primaryBlue.withOpacity(0.8),
-              ),
-              const SizedBox(width: AppTheme.spacingM),
-              Expanded(
-                child: Text(
-                  widget.currentPrompt ?? '',
-                  style: AppTheme.bodyMedium.copyWith(
-                    fontStyle: FontStyle.italic,
-                    color: AppTheme.textSecondary,
-                    fontSize: 13,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildBottomToolbar() {
     final bool hasImage =
         widget.imageUrl != null || widget.selectedImageBytes != null;
@@ -531,6 +477,35 @@ class _EditorCanvasState extends State<EditorCanvas> {
 
   Widget _buildToolbarDivider() {
     return Container(width: 1, height: 20, color: AppTheme.dividerColor);
+  }
+
+  Widget _buildRemoveImageButton() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: widget.onImageRemove,
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
+        child: Container(
+          padding: const EdgeInsets.all(AppTheme.spacingS),
+          decoration: BoxDecoration(
+            color: Colors.red.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.close,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildProcessingOverlay() {

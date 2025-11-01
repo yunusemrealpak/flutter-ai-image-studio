@@ -151,6 +151,13 @@ class _EditorScreenState extends State<EditorScreen> {
     }
   }
 
+  void _handleImageRemove() {
+    setState(() {
+      _selectedImageBytes = null;
+      _selectedImageName = null;
+    });
+  }
+
   Future<void> _handleGenerate() async {
     final prompt = _promptController.text.trim();
     if (prompt.isEmpty) {
@@ -252,6 +259,7 @@ class _EditorScreenState extends State<EditorScreen> {
                 isProcessing: isProcessing,
                 progress: progress,
                 onImagePick: _handleImagePick,
+                onImageRemove: _handleImageRemove,
               ),
             ),
             // Show the prompt used for the current job
@@ -278,11 +286,7 @@ class _EditorScreenState extends State<EditorScreen> {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.auto_awesome,
-            size: 20,
-            color: AppTheme.primaryBlue,
-          ),
+          const Icon(Icons.auto_awesome, size: 20, color: AppTheme.primaryBlue),
           const SizedBox(width: AppTheme.spacingM),
           Expanded(
             child: Text(
