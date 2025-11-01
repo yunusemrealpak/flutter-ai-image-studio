@@ -30,6 +30,8 @@ class _EditorCanvasState extends State<EditorCanvas> {
   double _zoomLevel = 100.0;
   double _value = 0.5;
   bool _showBeforeAfter = false;
+  final TransformationController _transformationController =
+      TransformationController();
 
   @override
   Widget build(BuildContext context) {
@@ -107,72 +109,88 @@ class _EditorCanvasState extends State<EditorCanvas> {
     }
 
     // Priority: selectedImageBytes > imageUrl > placeholder
+    Widget imageWidget;
     if (widget.selectedImageBytes != null) {
-      return Center(
-        child: Image.memory(widget.selectedImageBytes!, fit: BoxFit.contain),
+      imageWidget = Image.memory(
+        widget.selectedImageBytes!,
+        fit: BoxFit.contain,
       );
     } else if (widget.imageUrl != null) {
-      return Center(
-        child: Image.network(
-          widget.imageUrl!,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildPlaceholder();
-          },
-        ),
+      imageWidget = Image.network(
+        widget.imageUrl!,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildPlaceholder();
+        },
       );
+    } else {
+      return _buildPlaceholder();
     }
-    return _buildPlaceholder();
+
+    // Wrap image with InteractiveViewer for zoom/pan
+    return InteractiveViewer(
+      transformationController: _transformationController,
+      minScale: 0.1,
+      maxScale: 5.0,
+      constrained: false,
+      child: Center(child: imageWidget),
+    );
   }
 
   Widget _buildBeforeAfterComparison() {
-    return Center(
-      child: BeforeAfter(
-        value: _value,
-        before: Image.network(
-          widget.beforeImageUrl!,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: AppTheme.surfaceDarker,
-              child: const Center(
-                child: Icon(
-                  Icons.error_outline,
-                  color: AppTheme.iconColor,
-                  size: 48,
+    return InteractiveViewer(
+      transformationController: _transformationController,
+      minScale: 0.1,
+      maxScale: 5.0,
+      constrained: false,
+      child: Center(
+        child: BeforeAfter(
+          value: _value,
+          before: Image.network(
+            widget.beforeImageUrl!,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: AppTheme.surfaceDarker,
+                child: const Center(
+                  child: Icon(
+                    Icons.error_outline,
+                    color: AppTheme.iconColor,
+                    size: 48,
+                  ),
                 ),
-              ),
-            );
+              );
+            },
+          ),
+          after: Image.network(
+            widget.imageUrl!,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: AppTheme.surfaceDarker,
+                child: const Center(
+                  child: Icon(
+                    Icons.error_outline,
+                    color: AppTheme.iconColor,
+                    size: 48,
+                  ),
+                ),
+              );
+            },
+          ),
+          trackWidth: 4,
+          trackColor: Colors.white,
+          thumbDecoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: AppTheme.dividerColor, width: 2),
+            shape: BoxShape.circle,
+          ),
+          onValueChanged: (value) {
+            setState(() {
+              _value = value;
+            });
           },
         ),
-        after: Image.network(
-          widget.imageUrl!,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: AppTheme.surfaceDarker,
-              child: const Center(
-                child: Icon(
-                  Icons.error_outline,
-                  color: AppTheme.iconColor,
-                  size: 48,
-                ),
-              ),
-            );
-          },
-        ),
-        trackWidth: 4,
-        trackColor: Colors.white,
-        thumbDecoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: AppTheme.dividerColor, width: 2),
-          shape: BoxShape.circle,
-        ),
-        onValueChanged: (value) {
-          setState(() {
-            _value = value;
-          });
-        },
       ),
     );
   }
@@ -298,15 +316,19 @@ class _EditorCanvasState extends State<EditorCanvas> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildToolbarButton(Icons.remove, () {
-              setState(() => _zoomLevel = (_zoomLevel - 10).clamp(10, 500));
-            }, enabled: hasImage),
+            _buildToolbarButton(
+              Icons.remove,
+              () => _handleZoomOut(),
+              enabled: hasImage,
+            ),
             const SizedBox(width: AppTheme.spacingS),
             _buildZoomIndicator(),
             const SizedBox(width: AppTheme.spacingS),
-            _buildToolbarButton(Icons.add, () {
-              setState(() => _zoomLevel = (_zoomLevel + 10).clamp(10, 500));
-            }, enabled: hasImage),
+            _buildToolbarButton(
+              Icons.add,
+              () => _handleZoomIn(),
+              enabled: hasImage,
+            ),
             const SizedBox(width: AppTheme.spacingL),
             _buildToolbarDivider(),
             const SizedBox(width: AppTheme.spacingL),
@@ -318,13 +340,41 @@ class _EditorCanvasState extends State<EditorCanvas> {
             const SizedBox(width: AppTheme.spacingL),
             _buildToolbarDivider(),
             const SizedBox(width: AppTheme.spacingL),
-            _buildToolbarButton(Icons.fit_screen, () {
-              setState(() => _zoomLevel = 100.0);
-            }, enabled: hasImage),
+            _buildToolbarButton(
+              Icons.fit_screen,
+              () => _handleFitScreen(),
+              enabled: hasImage,
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void _handleZoomIn() {
+    setState(() {
+      _zoomLevel = (_zoomLevel + 10).clamp(10, 500);
+      _applyZoom();
+    });
+  }
+
+  void _handleZoomOut() {
+    setState(() {
+      _zoomLevel = (_zoomLevel - 10).clamp(10, 500);
+      _applyZoom();
+    });
+  }
+
+  void _handleFitScreen() {
+    setState(() {
+      _zoomLevel = 100.0;
+      _transformationController.value = Matrix4.identity();
+    });
+  }
+
+  void _applyZoom() {
+    final scale = _zoomLevel / 100.0;
+    _transformationController.value = Matrix4.identity()..scale(scale);
   }
 
   Future<void> _handleDownload() async {
