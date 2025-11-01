@@ -32,41 +32,81 @@ class AppDrawer extends StatelessWidget {
           bottom: BorderSide(color: AppTheme.dividerColor, width: 1),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.primaryBlue, AppTheme.accentOrange],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: const Center(
-              child: Icon(Icons.auto_awesome, color: Colors.white, size: 20),
-            ),
-          ),
-          const SizedBox(width: AppTheme.spacingM),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              const Text(
-                'AI Image Editor',
-                style: AppTheme.headingSmall,
-              ),
-              const SizedBox(height: AppTheme.spacingXS),
-              Text(
-                'Your Projects',
-                style: AppTheme.bodySmall.copyWith(
-                  color: AppTheme.textTertiary,
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppTheme.primaryBlue, AppTheme.accentOrange],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
+                child: const Center(
+                  child: Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                ),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'AI Image Editor',
+                    style: AppTheme.headingSmall,
+                  ),
+                  const SizedBox(height: AppTheme.spacingXS),
+                  Text(
+                    'Your Projects',
+                    style: AppTheme.bodySmall.copyWith(
+                      color: AppTheme.textTertiary,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+          const SizedBox(height: AppTheme.spacingL),
+          _buildNewEditButton(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNewEditButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          // Clear current job and close drawer
+          context.read<JobProvider>().clearCurrentJob();
+          Navigator.of(context).pop();
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.primaryBlue,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.spacingL,
+            vertical: AppTheme.spacingM,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          ),
+        ),
+        icon: const Icon(Icons.add, size: 18),
+        label: const Text(
+          'New Edit',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }

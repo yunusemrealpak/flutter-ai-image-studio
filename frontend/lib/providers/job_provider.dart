@@ -57,32 +57,35 @@ class JobProvider with ChangeNotifier {
     }
   }
 
-  /// Start polling for job status updates
+  /// Start polling for job status updates (polls ALL processing jobs)
   void _startPolling(String jobId) {
-    // Stop any existing polling
-    _stopPolling();
+    // If polling is already running, just return (it will poll all jobs)
+    if (_pollingTimer != null && _pollingTimer!.isActive) {
+      return;
+    }
 
     // Poll every 2 seconds
     _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
       try {
-        await refreshJob(jobId);
+        // Get all processing jobs
+        final processingJobs = _jobs.where((j) => j.isProcessing).toList();
 
-        // Stop polling if job is no longer processing
-        final job = _jobs.firstWhere((j) => j.id == jobId, orElse: () => Job(
-          id: '',
-          originalImageUrl: '',
-          prompt: '',
-          status: JobStatus.completed,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ));
-
-        if (!job.isProcessing || job.id.isEmpty) {
+        if (processingJobs.isEmpty) {
+          // No processing jobs, stop polling
           _stopPolling();
+          return;
+        }
+
+        // Refresh all processing jobs
+        for (final job in processingJobs) {
+          try {
+            await refreshJob(job.id);
+          } catch (e) {
+            debugPrint('Error refreshing job ${job.id}: $e');
+          }
         }
       } catch (e) {
         debugPrint('Polling error: $e');
-        // Continue polling even on error
       }
     });
   }

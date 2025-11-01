@@ -40,12 +40,16 @@ class _EditorScreenState extends State<EditorScreen> {
     final jobProvider = context.read<JobProvider>();
     final currentJob = jobProvider.currentJob;
 
-    // Clear selected image when job is completed
-    if (currentJob != null && currentJob.isCompleted && _selectedImageBytes != null) {
-      setState(() {
-        _selectedImageBytes = null;
-        _selectedImageName = null;
-      });
+    // Clear selected image when:
+    // 1. Job is completed
+    // 2. Current job is cleared (New Edit button)
+    if (_selectedImageBytes != null) {
+      if (currentJob == null || currentJob.isCompleted) {
+        setState(() {
+          _selectedImageBytes = null;
+          _selectedImageName = null;
+        });
+      }
     }
   }
 
