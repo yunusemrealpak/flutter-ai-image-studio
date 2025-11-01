@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
 import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:before_after/before_after.dart';
 
 import '../theme/app_theme.dart';
 
@@ -24,7 +26,6 @@ class EditorCanvas extends StatefulWidget {
 
 class _EditorCanvasState extends State<EditorCanvas> {
   double _zoomLevel = 100.0;
-  double _compareSliderPosition = 0.5;
 
   @override
   Widget build(BuildContext context) {
@@ -72,10 +73,6 @@ class _EditorCanvasState extends State<EditorCanvas> {
             // Main image or placeholder
             _buildImageOrPlaceholder(),
 
-            // Before/After comparison slider
-            if (widget.beforeImageUrl != null && widget.imageUrl != null)
-              _buildComparisonSlider(),
-
             // Bottom toolbar
             Positioned(
               bottom: AppTheme.spacingL,
@@ -83,10 +80,6 @@ class _EditorCanvasState extends State<EditorCanvas> {
               right: 0,
               child: _buildBottomToolbar(),
             ),
-
-            // Center compare button
-            if (widget.beforeImageUrl != null && widget.imageUrl != null)
-              _buildCenterCompareButton(),
           ],
         ),
       ),
@@ -94,13 +87,15 @@ class _EditorCanvasState extends State<EditorCanvas> {
   }
 
   Widget _buildImageOrPlaceholder() {
+    // Show before/after comparison if both images are available
+    if (widget.beforeImageUrl != null && widget.imageUrl != null) {
+      return _buildBeforeAfterComparison();
+    }
+
     // Priority: selectedImageBytes > imageUrl > placeholder
     if (widget.selectedImageBytes != null) {
       return Center(
-        child: Image.memory(
-          widget.selectedImageBytes!,
-          fit: BoxFit.contain,
-        ),
+        child: Image.memory(widget.selectedImageBytes!, fit: BoxFit.contain),
       );
     } else if (widget.imageUrl != null) {
       return Center(
@@ -114,6 +109,25 @@ class _EditorCanvasState extends State<EditorCanvas> {
       );
     }
     return _buildPlaceholder();
+  }
+
+  Widget _buildBeforeAfterComparison() {
+    return Center(
+      child: BeforeAfter(
+        beforeImage: Image.network(
+          widget.beforeImageUrl!,
+          fit: BoxFit.contain,
+        ),
+        afterImage: Image.network(
+          widget.imageUrl!,
+          fit: BoxFit.contain,
+        ),
+        sliderColor: Colors.white,
+        thumbColor: AppTheme.primaryBlue,
+        thumbRadius: 20,
+        overlayColor: Colors.transparent,
+      ),
+    );
   }
 
   Widget _buildPlaceholder() {
@@ -152,81 +166,10 @@ class _EditorCanvasState extends State<EditorCanvas> {
             const SizedBox(height: AppTheme.spacingS),
             Text(
               'Supported formats: PNG, JPG, WEBP',
-              style: AppTheme.bodySmall.copyWith(
-                color: AppTheme.textTertiary,
-              ),
+              style: AppTheme.bodySmall.copyWith(color: AppTheme.textTertiary),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildComparisonSlider() {
-    return Positioned.fill(
-      child: GestureDetector(
-        onHorizontalDragUpdate: (details) {
-          setState(() {
-            _compareSliderPosition =
-                (details.localPosition.dx / MediaQuery.of(context).size.width)
-                    .clamp(0.0, 1.0);
-          });
-        },
-        child: Stack(
-          children: [
-            // Before image (clipped)
-            Positioned.fill(
-              child: ClipRect(
-                clipper: _SliderClipper(_compareSliderPosition),
-                child: Image.network(
-                  widget.beforeImageUrl!,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-            // Slider line
-            Positioned(
-              left: MediaQuery.of(context).size.width * _compareSliderPosition,
-              top: 0,
-              bottom: 0,
-              child: Container(
-                width: 2,
-                color: Colors.white,
-                child: Center(
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.compare_arrows,
-                      color: AppTheme.backgroundDark,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCenterCompareButton() {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.spacingL,
-          vertical: AppTheme.spacingM,
-        ),
-        decoration: BoxDecoration(
-          color: AppTheme.primaryBlue,
-          borderRadius: BorderRadius.circular(AppTheme.radiusL),
-        ),
-        child: const Icon(Icons.compare, color: Colors.white, size: 24),
       ),
     );
   }
@@ -310,22 +253,5 @@ class _EditorCanvasState extends State<EditorCanvas> {
 
   Widget _buildToolbarDivider() {
     return Container(width: 1, height: 20, color: AppTheme.dividerColor);
-  }
-}
-
-/// Custom clipper for before/after comparison slider
-class _SliderClipper extends CustomClipper<Rect> {
-  final double position;
-
-  _SliderClipper(this.position);
-
-  @override
-  Rect getClip(Size size) {
-    return Rect.fromLTWH(0, 0, size.width * position, size.height);
-  }
-
-  @override
-  bool shouldReclip(_SliderClipper oldClipper) {
-    return oldClipper.position != position;
   }
 }
