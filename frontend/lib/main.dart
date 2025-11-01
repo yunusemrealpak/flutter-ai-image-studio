@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/job_provider.dart';
-import 'screens/main_screen.dart';
+import 'screens/editor_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,12 +18,8 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'AI Image Editor',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          primaryColor: const Color(0xFF2196F3),
-          useMaterial3: true,
-        ),
-        home: const MainScreen(),
+        theme: AppTheme.darkTheme,
+        home: const EditorScreen(),
       ),
     );
   }
