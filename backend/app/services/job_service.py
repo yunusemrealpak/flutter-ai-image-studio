@@ -43,43 +43,63 @@ class JobService:
         job_data: JobCreate
     ) -> Job:
         """
-        Create a new image editing job
+        Create a new image editing job (returns immediately with PROCESSING status)
 
         Args:
             original_image_url: Original image data URI
             job_data: Job creation data (prompt)
 
         Returns:
-            Created job with AI-edited image
-
-        Raises:
-            Exception: If AI processing fails
+            Created job in PROCESSING state (processing will continue in background)
         """
-        # Create job record
+        # Create job record with PROCESSING status
         job = Job(
             original_image_url=original_image_url,
             prompt=job_data.prompt,
-            status=JobStatus.PROCESSING
+            status=JobStatus.PROCESSING,
+            progress=0
         )
 
         # Store job
         job_store.create_job(job)
 
+        # Return job immediately - processing will happen in background
+        return job
+
+    async def process_job_with_ai(self, job_id: str):
+        """
+        Process job with AI in background (called by BackgroundTasks)
+
+        Args:
+            job_id: Job ID to process
+        """
+        job = job_store.get_job(job_id)
+        if not job:
+            return
+
         try:
             # Extract image bytes from data URI
             image_bytes, image_format = await self._get_image_bytes_from_data_uri(
-                original_image_url
+                job.original_image_url
             )
 
-            # Call fal.ai to edit image
+            # Progress callback to update job progress
+            def update_progress(progress: int):
+                job.progress = progress
+                job.updated_at = datetime.utcnow()
+                job_store.update_job(job)
+
+            # Call fal.ai to edit image with progress tracking
             result = await fal_ai_service.edit_image(
                 image_data=image_bytes,
-                prompt=job_data.prompt,
-                image_format=image_format
+                prompt=job.prompt,
+                image_format=image_format,
+                on_progress=update_progress
             )
 
             # Update job with result
             job.status = JobStatus.COMPLETED
+            job.progress = 100
             job.edited_image_url = result["images"][0]["url"]
             job.updated_at = datetime.utcnow()
 
@@ -91,9 +111,6 @@ class JobService:
             job.error_message = str(e)
             job.updated_at = datetime.utcnow()
             job_store.update_job(job)
-            raise Exception(f"Failed to process job: {str(e)}")
-
-        return job
 
     def get_job(self, job_id: str) -> Optional[Job]:
         """Get job by ID"""

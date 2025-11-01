@@ -1,6 +1,6 @@
 import os
 import base64
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Callable
 from io import BytesIO
 from PIL import Image
 import fal_client
@@ -19,15 +19,17 @@ class FalAIService:
         self,
         image_data: bytes,
         prompt: str,
-        image_format: str = "png"
+        image_format: str = "png",
+        on_progress: Optional[Callable[[int], None]] = None
     ) -> Dict[str, Any]:
         """
-        Edit an image using fal.ai's Seedream v4 model
+        Edit an image using fal.ai's Seedream v4 model with progress tracking
 
         Args:
             image_data: Raw image bytes
             prompt: Text description of desired edits
             image_format: Image format (png, jpg, etc.)
+            on_progress: Optional callback for progress updates (0-100)
 
         Returns:
             Dict containing edited image URL and metadata
@@ -56,11 +58,41 @@ class FalAIService:
                 }
             }
 
-            # Submit request to fal.ai using async API
-            result = await fal_client.run_async(
+            # Submit request and get handle for progress tracking
+            handle = await fal_client.submit_async(
                 "fal-ai/bytedance/seedream/v4/edit",
                 arguments=arguments
             )
+
+            # Report initial progress
+            if on_progress:
+                on_progress(10)
+
+            # Subscribe to status updates
+            async for event in fal_client.stream_async(handle):
+                # Check event type and update progress
+                if isinstance(event, dict):
+                    # Extract progress from logs if available
+                    if "logs" in event:
+                        logs = event["logs"]
+                        if logs:
+                            # Estimate progress based on log messages
+                            if "Downloading" in str(logs[-1]):
+                                if on_progress:
+                                    on_progress(30)
+                            elif "Processing" in str(logs[-1]):
+                                if on_progress:
+                                    on_progress(50)
+                            elif "Generating" in str(logs[-1]):
+                                if on_progress:
+                                    on_progress(70)
+
+            # Get final result
+            result = await fal_client.result_async(handle)
+
+            # Report completion
+            if on_progress:
+                on_progress(100)
 
             return result
 

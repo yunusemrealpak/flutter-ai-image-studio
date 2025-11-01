@@ -1,16 +1,17 @@
 import 'dart:typed_data';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import '../providers/job_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/editor_app_bar.dart';
 import '../widgets/editor_canvas.dart';
-import '../widgets/recent_edits_bar.dart';
 import '../widgets/prompt_input_bar.dart';
+import '../widgets/recent_edits_bar.dart';
 
 /// Main editor screen with full layout
 class EditorScreen extends StatefulWidget {
@@ -116,7 +117,6 @@ class _EditorScreenState extends State<EditorScreen> {
       );
 
       if (mounted) {
-        _showInfo('Image generated successfully!');
         // Clear the selected image after successful generation
         setState(() {
           _selectedImageBytes = null;
@@ -146,9 +146,7 @@ class _EditorScreenState extends State<EditorScreen> {
       body: Builder(
         builder: (context) => Column(
           children: [
-            EditorAppBar(
-              onMenuTap: () => Scaffold.of(context).openDrawer(),
-            ),
+            EditorAppBar(onMenuTap: () => Scaffold.of(context).openDrawer()),
             Expanded(
               child: Column(
                 children: [
@@ -185,10 +183,14 @@ class _EditorScreenState extends State<EditorScreen> {
         final hasNewImage = _selectedImageBytes != null;
         final hasExistingImage = jobProvider.currentJob?.editedImageUrl != null;
         final isEditingExisting = hasExistingImage && !hasNewImage;
+        final currentJob = jobProvider.currentJob;
+        final isProcessing = currentJob?.isProcessing ?? false;
+        final progress = currentJob?.progress ?? 0;
 
         return PromptInputBar(
           controller: _promptController,
-          isLoading: jobProvider.isLoading,
+          isLoading: isProcessing,
+          progress: progress,
           hasImage: hasNewImage || hasExistingImage,
           isEditingExisting: isEditingExisting,
           onGenerate: _handleGenerate,

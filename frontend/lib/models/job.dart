@@ -29,6 +29,7 @@ class Job {
   final String? editedImageUrl;
   final String prompt;
   final JobStatus status;
+  final int progress; // Progress percentage (0-100)
   final String? errorMessage;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -39,6 +40,7 @@ class Job {
     this.editedImageUrl,
     required this.prompt,
     required this.status,
+    this.progress = 0,
     this.errorMessage,
     required this.createdAt,
     required this.updatedAt,
@@ -52,6 +54,7 @@ class Job {
       editedImageUrl: json['edited_image_url'] as String?,
       prompt: json['prompt'] as String,
       status: JobStatus.fromString(json['status'] as String),
+      progress: (json['progress'] as num?)?.toInt() ?? 0,
       errorMessage: json['error_message'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
@@ -66,6 +69,7 @@ class Job {
       'edited_image_url': editedImageUrl,
       'prompt': prompt,
       'status': status.name,
+      'progress': progress,
       'error_message': errorMessage,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -79,6 +83,7 @@ class Job {
     String? editedImageUrl,
     String? prompt,
     JobStatus? status,
+    int? progress,
     String? errorMessage,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -89,6 +94,7 @@ class Job {
       editedImageUrl: editedImageUrl ?? this.editedImageUrl,
       prompt: prompt ?? this.prompt,
       status: status ?? this.status,
+      progress: progress ?? this.progress,
       errorMessage: errorMessage ?? this.errorMessage,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

@@ -20,6 +20,7 @@ class Job(BaseModel):
     edited_image_url: Optional[str] = None
     prompt: str
     status: JobStatus = JobStatus.PENDING
+    progress: int = Field(default=0, ge=0, le=100)  # Progress percentage (0-100)
     error_message: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -42,6 +43,7 @@ class JobResponse(BaseModel):
     edited_image_url: Optional[str]
     prompt: str
     status: JobStatus
+    progress: int = 0
     error_message: Optional[str] = None
     created_at: datetime
     updated_at: datetime

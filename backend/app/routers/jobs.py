@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
 from typing import List
 from app.models import Job, JobCreate, JobResponse
 from app.services.job_service import job_service
@@ -9,18 +9,20 @@ router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
 @router.post("", response_model=JobResponse, status_code=201)
 async def create_job(
+    background_tasks: BackgroundTasks,
     image: UploadFile = File(...),
     prompt: str = Form(...)
 ):
     """
-    Create a new image editing job
+    Create a new image editing job (returns immediately, processing in background)
 
     Args:
+        background_tasks: FastAPI background tasks
         image: Uploaded image file
         prompt: Text prompt for editing
 
     Returns:
-        Created job with processing status
+        Created job with PROCESSING status (use GET /api/jobs/{job_id} to check progress)
     """
     try:
         # Read image file
@@ -36,9 +38,12 @@ async def create_job(
         # Create data URI
         original_image_url = f"data:{content_type};base64,{image_base64}"
 
-        # Create job
+        # Create job (returns immediately with PROCESSING status)
         job_data = JobCreate(prompt=prompt)
         job = await job_service.create_job(original_image_url, job_data)
+
+        # Add AI processing to background tasks
+        background_tasks.add_task(job_service.process_job_with_ai, job.id)
 
         return job
 

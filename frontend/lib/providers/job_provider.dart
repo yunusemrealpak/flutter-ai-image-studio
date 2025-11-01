@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import '../models/job.dart';
@@ -12,6 +13,7 @@ class JobProvider with ChangeNotifier {
   Job? _currentJob;
   bool _isLoading = false;
   String? _errorMessage;
+  Timer? _pollingTimer;
 
   // Getters
   List<Job> get jobs => _jobs;
@@ -19,7 +21,7 @@ class JobProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  /// Create a new job
+  /// Create a new job and start polling for status
   Future<Job> createJob({
     required Uint8List imageBytes,
     required String imageName,
@@ -41,6 +43,11 @@ class JobProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
 
+      // Start polling for job status if it's processing
+      if (job.isProcessing) {
+        _startPolling(job.id);
+      }
+
       return job;
     } catch (e) {
       _errorMessage = e.toString();
@@ -48,6 +55,42 @@ class JobProvider with ChangeNotifier {
       notifyListeners();
       rethrow;
     }
+  }
+
+  /// Start polling for job status updates
+  void _startPolling(String jobId) {
+    // Stop any existing polling
+    _stopPolling();
+
+    // Poll every 2 seconds
+    _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      try {
+        await refreshJob(jobId);
+
+        // Stop polling if job is no longer processing
+        final job = _jobs.firstWhere((j) => j.id == jobId, orElse: () => Job(
+          id: '',
+          originalImageUrl: '',
+          prompt: '',
+          status: JobStatus.completed,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ));
+
+        if (!job.isProcessing || job.id.isEmpty) {
+          _stopPolling();
+        }
+      } catch (e) {
+        debugPrint('Polling error: $e');
+        // Continue polling even on error
+      }
+    });
+  }
+
+  /// Stop polling for job status
+  void _stopPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
   }
 
   /// Load all jobs (version history)
@@ -131,10 +174,17 @@ class JobProvider with ChangeNotifier {
 
   /// Reset all state
   void reset() {
+    _stopPolling();
     _jobs = [];
     _currentJob = null;
     _isLoading = false;
     _errorMessage = null;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _stopPolling();
+    super.dispose();
   }
 }

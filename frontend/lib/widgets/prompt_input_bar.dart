@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 class PromptInputBar extends StatefulWidget {
   final TextEditingController controller;
   final bool isLoading;
+  final int progress; // Progress percentage (0-100)
   final bool hasImage;
   final bool isEditingExisting;
   final VoidCallback? onGenerate;
@@ -13,6 +14,7 @@ class PromptInputBar extends StatefulWidget {
     Key? key,
     required this.controller,
     this.isLoading = false,
+    this.progress = 0,
     this.hasImage = false,
     this.isEditingExisting = false,
     this.onGenerate,
@@ -128,8 +130,8 @@ class _PromptInputBarState extends State<PromptInputBar> {
         child: widget.isLoading
             ? Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
-                  SizedBox(
+                children: [
+                  const SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
@@ -137,8 +139,8 @@ class _PromptInputBarState extends State<PromptInputBar> {
                       color: AppTheme.textPrimary,
                     ),
                   ),
-                  SizedBox(width: AppTheme.spacingM),
-                  Text('Generating...'),
+                  const SizedBox(width: AppTheme.spacingM),
+                  Text('${widget.progress}% Generating...'),
                 ],
               )
             : Row(
