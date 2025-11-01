@@ -1,5 +1,6 @@
 import 'dart:html' as html;
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:before_after/before_after.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,8 @@ class EditorCanvas extends StatefulWidget {
   final String? imageUrl;
   final String? beforeImageUrl;
   final Uint8List? selectedImageBytes;
+  final bool isProcessing;
+  final int progress;
   final VoidCallback? onImagePick;
 
   const EditorCanvas({
@@ -20,6 +23,8 @@ class EditorCanvas extends StatefulWidget {
     this.imageUrl,
     this.beforeImageUrl,
     this.selectedImageBytes,
+    this.isProcessing = false,
+    this.progress = 0,
     this.onImagePick,
   });
 
@@ -77,6 +82,10 @@ class _EditorCanvasState extends State<EditorCanvas> {
           children: [
             // Main image or placeholder
             _buildImageOrPlaceholder(),
+
+            // Processing overlay (blur + animation)
+            if (widget.isProcessing && widget.selectedImageBytes != null)
+              _buildProcessingOverlay(),
 
             // Before/After toggle button (only show when both images available)
             if (widget.beforeImageUrl != null && widget.imageUrl != null)
@@ -452,5 +461,96 @@ class _EditorCanvasState extends State<EditorCanvas> {
 
   Widget _buildToolbarDivider() {
     return Container(width: 1, height: 20, color: AppTheme.dividerColor);
+  }
+
+  Widget _buildProcessingOverlay() {
+    return Positioned.fill(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          color: Colors.black.withOpacity(0.3),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // AI Processing Animation
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryBlue.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Rotating circle
+                      SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppTheme.primaryBlue,
+                          ),
+                        ),
+                      ),
+                      // AI Icon
+                      const Icon(
+                        Icons.auto_awesome,
+                        size: 48,
+                        color: AppTheme.primaryBlue,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppTheme.spacingXL),
+                // Progress text
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.spacingXL,
+                    vertical: AppTheme.spacingL,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceDarker.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusL),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'AI is enhancing your image',
+                        style: AppTheme.headingSmall.copyWith(
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: AppTheme.spacingM),
+                      Text(
+                        '${widget.progress}% Complete',
+                        style: AppTheme.bodyLarge.copyWith(
+                          color: AppTheme.primaryBlue,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppTheme.spacingM),
+                      // Progress bar
+                      SizedBox(
+                        width: 200,
+                        child: LinearProgressIndicator(
+                          value: widget.progress / 100,
+                          backgroundColor: AppTheme.dividerColor,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppTheme.primaryBlue,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

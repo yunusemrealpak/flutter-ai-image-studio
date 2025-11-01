@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/models/job.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
@@ -54,7 +55,6 @@ class _EditorScreenState extends State<EditorScreen> {
           _selectedImageName = null;
         });
       }
-
       // Case 2: Job was cleared (New Edit button)
       else if (_previousJob != null && currentJob == null) {
         setState(() {
@@ -200,11 +200,15 @@ class _EditorScreenState extends State<EditorScreen> {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
         final currentJob = jobProvider.currentJob;
+        final isProcessing = currentJob?.isProcessing ?? false;
+        final progress = currentJob?.progress ?? 0;
 
         return EditorCanvas(
           imageUrl: currentJob?.editedImageUrl,
           beforeImageUrl: currentJob?.originalImageUrl,
           selectedImageBytes: _selectedImageBytes,
+          isProcessing: isProcessing,
+          progress: progress,
           onImagePick: _handleImagePick,
         );
       },
