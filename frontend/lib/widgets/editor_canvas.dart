@@ -129,10 +129,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
     // Center image with zoom applied via Transform.scale
     final scale = _zoomLevel / 100.0;
     return Center(
-      child: Transform.scale(
-        scale: scale,
-        child: imageWidget,
-      ),
+      child: Transform.scale(scale: scale, child: imageWidget),
     );
   }
 
@@ -382,10 +379,8 @@ class _EditorCanvasState extends State<EditorCanvas> {
     // Navigate to full screen viewer
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => FullScreenImageViewer(
-          imageUrl: imageUrl,
-          imageBytes: imageBytes,
-        ),
+        builder: (context) =>
+            FullScreenImageViewer(imageUrl: imageUrl, imageBytes: imageBytes),
       ),
     );
   }

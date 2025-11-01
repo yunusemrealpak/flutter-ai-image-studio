@@ -6,10 +6,10 @@ import 'package:http/http.dart' as http;
 
 import '../providers/job_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_drawer.dart';
 import '../widgets/editor_app_bar.dart';
 import '../widgets/editor_canvas.dart';
 import '../widgets/editor_settings_panel.dart';
-import '../widgets/editor_sidebar.dart';
 import '../widgets/recent_edits_bar.dart';
 import '../widgets/prompt_input_bar.dart';
 
@@ -161,27 +161,33 @@ class _EditorScreenState extends State<EditorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundDark,
-      body: Column(
-        children: [
-          EditorAppBar(onSaveExport: _handleSaveExport, onShare: _handleShare),
-          Expanded(
-            child: Row(
-              children: [
-                const EditorSidebar(),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(child: _buildMainContent()),
-                      _buildPromptInputBar(),
-                    ],
-                  ),
-                ),
-                const EditorSettingsPanel(),
-              ],
+      drawer: const AppDrawer(),
+      body: Builder(
+        builder: (context) => Column(
+          children: [
+            EditorAppBar(
+              onSaveExport: _handleSaveExport,
+              onShare: _handleShare,
+              onMenuTap: () => Scaffold.of(context).openDrawer(),
             ),
-          ),
-          _buildRecentEditsBar(),
-        ],
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(child: _buildMainContent()),
+                        _buildPromptInputBar(),
+                      ],
+                    ),
+                  ),
+                  const EditorSettingsPanel(),
+                ],
+              ),
+            ),
+            _buildRecentEditsBar(),
+          ],
+        ),
       ),
     );
   }

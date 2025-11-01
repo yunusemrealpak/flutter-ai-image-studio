@@ -5,11 +5,13 @@ import '../theme/app_theme.dart';
 class EditorAppBar extends StatelessWidget {
   final VoidCallback? onSaveExport;
   final VoidCallback? onShare;
+  final VoidCallback? onMenuTap;
 
   const EditorAppBar({
     Key? key,
     this.onSaveExport,
     this.onShare,
+    this.onMenuTap,
   }) : super(key: key);
 
   @override
@@ -23,6 +25,8 @@ class EditorAppBar extends StatelessWidget {
       ),
       child: Row(
         children: [
+          _buildMenuButton(),
+          const SizedBox(width: AppTheme.spacingL),
           _buildLogo(),
           const SizedBox(width: AppTheme.spacingXXL),
           _buildUserProfile(),
@@ -30,6 +34,14 @@ class EditorAppBar extends StatelessWidget {
           _buildActionButtons(),
         ],
       ),
+    );
+  }
+
+  Widget _buildMenuButton() {
+    return IconButton(
+      icon: const Icon(Icons.menu, color: AppTheme.iconColor),
+      onPressed: onMenuTap,
+      tooltip: 'Menu',
     );
   }
 
