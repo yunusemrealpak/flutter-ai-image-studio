@@ -17,6 +17,7 @@ class EditorCanvas extends StatefulWidget {
   final bool isProcessing;
   final int progress;
   final VoidCallback? onImagePick;
+  final String? currentPrompt;
 
   const EditorCanvas({
     super.key,
@@ -26,6 +27,7 @@ class EditorCanvas extends StatefulWidget {
     this.isProcessing = false,
     this.progress = 0,
     this.onImagePick,
+    this.currentPrompt,
   });
 
   @override
@@ -97,6 +99,19 @@ class _EditorCanvasState extends State<EditorCanvas> {
                 top: AppTheme.spacingL,
                 right: AppTheme.spacingL,
                 child: _buildBeforeAfterToggle(),
+              ),
+
+            // Prompt display (show when we have a prompt and an image)
+            if (widget.currentPrompt != null &&
+                widget.currentPrompt!.isNotEmpty &&
+                (widget.imageUrl != null ||
+                    widget.beforeImageUrl != null ||
+                    widget.selectedImageBytes != null))
+              Positioned(
+                bottom: AppTheme.spacingXL * 3,
+                left: 0,
+                right: 0,
+                child: _buildPromptDisplay(),
               ),
 
             // Bottom toolbar
@@ -301,6 +316,57 @@ class _EditorCanvasState extends State<EditorCanvas> {
               style: AppTheme.bodySmall.copyWith(color: AppTheme.textTertiary),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPromptDisplay() {
+    return Center(
+      child: FractionallySizedBox(
+        widthFactor: 0.7, // 70% width
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.spacingL,
+            vertical: AppTheme.spacingM,
+          ),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceDark.withOpacity(0.95),
+            borderRadius: BorderRadius.circular(AppTheme.radiusL),
+            border: Border.all(
+              color: AppTheme.primaryBlue.withOpacity(0.3),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.auto_awesome,
+                size: 18,
+                color: AppTheme.primaryBlue.withOpacity(0.8),
+              ),
+              const SizedBox(width: AppTheme.spacingM),
+              Expanded(
+                child: Text(
+                  widget.currentPrompt ?? '',
+                  style: AppTheme.bodyMedium.copyWith(
+                    fontStyle: FontStyle.italic,
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

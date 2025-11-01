@@ -242,61 +242,16 @@ class _EditorScreenState extends State<EditorScreen> {
         final isProcessing = currentJob?.isProcessing ?? false;
         final progress = currentJob?.progress ?? 0;
 
-        return Column(
-          children: [
-            Expanded(
-              child: EditorCanvas(
-                imageUrl: currentJob?.editedImageUrl,
-                beforeImageUrl: currentJob?.originalImageUrl,
-                selectedImageBytes: _selectedImageBytes,
-                isProcessing: isProcessing,
-                progress: progress,
-                onImagePick: _handleImagePick,
-              ),
-            ),
-            // Show the prompt used for the current job
-            if (currentJob != null && currentJob.prompt.isNotEmpty)
-              _buildUsedPromptDisplay(currentJob.prompt),
-          ],
+        return EditorCanvas(
+          imageUrl: currentJob?.editedImageUrl,
+          beforeImageUrl: currentJob?.originalImageUrl,
+          selectedImageBytes: _selectedImageBytes,
+          isProcessing: isProcessing,
+          progress: progress,
+          onImagePick: _handleImagePick,
+          currentPrompt: currentJob?.prompt,
         );
       },
-    );
-  }
-
-  Widget _buildUsedPromptDisplay(String prompt) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.spacingXL,
-        vertical: AppTheme.spacingM,
-      ),
-      decoration: const BoxDecoration(
-        color: AppTheme.surfaceDarker,
-        border: Border(
-          top: BorderSide(color: AppTheme.dividerColor, width: 1),
-        ),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.auto_awesome,
-            size: 16,
-            color: AppTheme.textTertiary,
-          ),
-          const SizedBox(width: AppTheme.spacingS),
-          Expanded(
-            child: Text(
-              prompt,
-              style: AppTheme.bodySmall.copyWith(
-                fontStyle: FontStyle.italic,
-                color: AppTheme.textTertiary,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
