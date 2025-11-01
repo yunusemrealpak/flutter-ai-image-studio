@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:before_after/before_after.dart';
+import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
@@ -114,17 +114,17 @@ class _EditorCanvasState extends State<EditorCanvas> {
   Widget _buildBeforeAfterComparison() {
     return Center(
       child: BeforeAfter(
-        beforeImage: Image.network(
+        beforeWidget: Image.network(
           widget.beforeImageUrl!,
           fit: BoxFit.contain,
         ),
-        afterImage: Image.network(
+        afterWidget: Image.network(
           widget.imageUrl!,
           fit: BoxFit.contain,
         ),
-        sliderColor: Colors.white,
-        thumbColor: AppTheme.primaryBlue,
-        thumbRadius: 20,
+        dividerColor: Colors.white,
+        handleColor: AppTheme.primaryBlue,
+        handleRadius: 20,
         overlayColor: Colors.transparent,
       ),
     );
