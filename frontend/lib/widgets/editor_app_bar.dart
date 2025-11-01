@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../providers/job_provider.dart';
 import '../theme/app_theme.dart';
 
 /// Top application bar for the editor
@@ -25,7 +28,7 @@ class EditorAppBar extends StatelessWidget {
           const SizedBox(width: AppTheme.spacingL),
           _buildLogo(),
           const SizedBox(width: AppTheme.spacingXXL),
-          _buildUserProfile(),
+          _buildNewEditButton(context),
           const Spacer(),
         ],
       ),
@@ -56,51 +59,30 @@ class EditorAppBar extends StatelessWidget {
     );
   }
 
-  Widget _buildUserProfile() {
-    return Row(
-      children: [
-        _buildAvatar(),
-        const SizedBox(width: AppTheme.spacingM),
-        _buildUserInfo(),
-      ],
-    );
-  }
-
-  Widget _buildAvatar() {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceDark,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: AppTheme.dividerColor,
-          width: 1,
+  Widget _buildNewEditButton(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        // Clear current job and navigate to home
+        context.read<JobProvider>().clearCurrentJob();
+        context.go('/');
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppTheme.primaryBlue,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spacingL,
+          vertical: AppTheme.spacingM,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusM),
         ),
       ),
-      child: const Icon(
-        Icons.person,
-        color: AppTheme.textSecondary,
-        size: 20,
+      icon: const Icon(Icons.add, size: 18),
+      label: const Text(
+        'New Edit',
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
       ),
-    );
-  }
-
-  Widget _buildUserInfo() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
-        Text(
-          'Lucas Fabian',
-          style: AppTheme.bodyMedium,
-        ),
-        SizedBox(height: 2),
-        Text(
-          'example@gmail.com',
-          style: AppTheme.bodySmall,
-        ),
-      ],
     );
   }
 }
