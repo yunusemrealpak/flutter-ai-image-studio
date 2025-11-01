@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
 
 import '../providers/job_provider.dart';
 import '../theme/app_theme.dart';
@@ -93,22 +94,43 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   Future<void> _handleGenerate() async {
-    if (_selectedImageBytes == null) {
-      _showError('Please upload an image first');
-      return;
-    }
-
     final prompt = _promptController.text.trim();
     if (prompt.isEmpty) {
       _showError('Please enter a prompt');
       return;
     }
 
+    final jobProvider = context.read<JobProvider>();
+    Uint8List? imageBytes;
+    String imageName;
+
+    // Check if continuing from an existing edited image
+    if (jobProvider.currentJob != null &&
+        jobProvider.currentJob!.editedImageUrl != null &&
+        _selectedImageBytes == null) {
+      // Download the edited image from URL
+      try {
+        imageBytes = await _downloadImageFromUrl(
+          jobProvider.currentJob!.editedImageUrl!,
+        );
+        imageName = 'edited_${jobProvider.currentJob!.id}.png';
+      } catch (e) {
+        _showError('Failed to load image for editing: $e');
+        return;
+      }
+    } else if (_selectedImageBytes != null) {
+      // Use newly uploaded image
+      imageBytes = _selectedImageBytes;
+      imageName = _selectedImageName ?? 'image.png';
+    } else {
+      _showError('Please upload an image first');
+      return;
+    }
+
     try {
-      final jobProvider = context.read<JobProvider>();
       await jobProvider.createJob(
-        imageBytes: _selectedImageBytes!,
-        imageName: _selectedImageName ?? 'image.png',
+        imageBytes: imageBytes!,
+        imageName: imageName,
         prompt: prompt,
       );
 
@@ -123,6 +145,15 @@ class _EditorScreenState extends State<EditorScreen> {
       }
     } catch (e) {
       _showError('Failed to generate image: $e');
+    }
+  }
+
+  Future<Uint8List> _downloadImageFromUrl(String url) async {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    } else {
+      throw Exception('Failed to download image');
     }
   }
 
@@ -173,10 +204,15 @@ class _EditorScreenState extends State<EditorScreen> {
   Widget _buildPromptInputBar() {
     return Consumer<JobProvider>(
       builder: (context, jobProvider, child) {
+        final hasNewImage = _selectedImageBytes != null;
+        final hasExistingImage = jobProvider.currentJob?.editedImageUrl != null;
+        final isEditingExisting = hasExistingImage && !hasNewImage;
+
         return PromptInputBar(
           controller: _promptController,
           isLoading: jobProvider.isLoading,
-          hasImage: _selectedImageBytes != null,
+          hasImage: hasNewImage || hasExistingImage,
+          isEditingExisting: isEditingExisting,
           onGenerate: _handleGenerate,
         );
       },

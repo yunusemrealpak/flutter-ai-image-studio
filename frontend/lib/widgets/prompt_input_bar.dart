@@ -6,6 +6,7 @@ class PromptInputBar extends StatefulWidget {
   final TextEditingController controller;
   final bool isLoading;
   final bool hasImage;
+  final bool isEditingExisting;
   final VoidCallback? onGenerate;
 
   const PromptInputBar({
@@ -13,6 +14,7 @@ class PromptInputBar extends StatefulWidget {
     required this.controller,
     this.isLoading = false,
     this.hasImage = false,
+    this.isEditingExisting = false,
     this.onGenerate,
   }) : super(key: key);
 
@@ -76,9 +78,7 @@ class _PromptInputBarState extends State<PromptInputBar> {
         maxLines: 1,
         style: AppTheme.bodyMedium,
         decoration: InputDecoration(
-          hintText: widget.hasImage
-              ? 'Describe how you want to edit the image...'
-              : 'Upload an image first to start editing',
+          hintText: _getHintText(),
           hintStyle: AppTheme.bodyMedium.copyWith(
             color: AppTheme.textTertiary,
           ),
@@ -151,6 +151,16 @@ class _PromptInputBarState extends State<PromptInputBar> {
               ),
       ),
     );
+  }
+
+  String _getHintText() {
+    if (!widget.hasImage) {
+      return 'Upload an image first to start editing';
+    }
+    if (widget.isEditingExisting) {
+      return 'Continue editing with a new prompt...';
+    }
+    return 'Describe how you want to edit the image...';
   }
 
   void _handleGenerate() {

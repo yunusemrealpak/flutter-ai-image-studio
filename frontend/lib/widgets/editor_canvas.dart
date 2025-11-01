@@ -1,7 +1,9 @@
 import 'dart:typed_data';
+import 'dart:html' as html;
 
 import 'package:before_after/before_after.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import '../theme/app_theme.dart';
 
@@ -48,7 +50,7 @@ class _EditorCanvasState extends State<EditorCanvas> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text('Greseel.raw', style: AppTheme.headingMedium),
+        const Text('', style: AppTheme.headingMedium),
         _buildHeaderMenu(),
       ],
     );
@@ -280,6 +282,8 @@ class _EditorCanvasState extends State<EditorCanvas> {
   }
 
   Widget _buildBottomToolbar() {
+    final bool hasImage = widget.imageUrl != null || widget.selectedImageBytes != null;
+
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(
@@ -293,42 +297,85 @@ class _EditorCanvasState extends State<EditorCanvas> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildToolbarButton(Icons.remove, () {
-              setState(() => _zoomLevel = (_zoomLevel - 10).clamp(10, 500));
-            }),
+            _buildToolbarButton(
+              Icons.remove,
+              () {
+                setState(() => _zoomLevel = (_zoomLevel - 10).clamp(10, 500));
+              },
+              enabled: hasImage,
+            ),
             const SizedBox(width: AppTheme.spacingS),
             _buildZoomIndicator(),
             const SizedBox(width: AppTheme.spacingS),
-            _buildToolbarButton(Icons.add, () {
-              setState(() => _zoomLevel = (_zoomLevel + 10).clamp(10, 500));
-            }),
+            _buildToolbarButton(
+              Icons.add,
+              () {
+                setState(() => _zoomLevel = (_zoomLevel + 10).clamp(10, 500));
+              },
+              enabled: hasImage,
+            ),
             const SizedBox(width: AppTheme.spacingL),
             _buildToolbarDivider(),
             const SizedBox(width: AppTheme.spacingL),
-            _buildToolbarButton(Icons.fit_screen, () {}),
+            _buildToolbarButton(
+              Icons.download,
+              _handleDownload,
+              enabled: widget.imageUrl != null,
+            ),
             const SizedBox(width: AppTheme.spacingL),
             _buildToolbarDivider(),
             const SizedBox(width: AppTheme.spacingL),
-            _buildToolbarButton(Icons.undo, () {}),
-            const SizedBox(width: AppTheme.spacingS),
-            _buildToolbarButton(Icons.redo, () {}),
-            const SizedBox(width: AppTheme.spacingL),
-            _buildToolbarDivider(),
-            const SizedBox(width: AppTheme.spacingL),
-            _buildToolbarButton(Icons.rotate_right, () {}),
+            _buildToolbarButton(
+              Icons.fit_screen,
+              () {
+                setState(() => _zoomLevel = 100.0);
+              },
+              enabled: hasImage,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildToolbarButton(IconData icon, VoidCallback onTap) {
+  Future<void> _handleDownload() async {
+    if (widget.imageUrl == null) return;
+
+    try {
+      // Download the image
+      final response = await http.get(Uri.parse(widget.imageUrl!));
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        final blob = html.Blob([bytes]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'edited_image.png')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      }
+    } catch (e) {
+      // Ignore errors silently or show a snackbar if needed
+      debugPrint('Download failed: $e');
+    }
+  }
+
+  Widget _buildToolbarButton(
+    IconData icon,
+    VoidCallback? onTap, {
+    bool enabled = true,
+  }) {
     return InkWell(
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
       borderRadius: BorderRadius.circular(AppTheme.radiusS),
       child: Padding(
         padding: const EdgeInsets.all(AppTheme.spacingXS),
-        child: Icon(icon, color: AppTheme.iconColor, size: 20),
+        child: Icon(
+          icon,
+          color: enabled
+              ? AppTheme.iconColor
+              : AppTheme.iconColor.withOpacity(0.3),
+          size: 20,
+        ),
       ),
     );
   }
