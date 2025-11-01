@@ -8,7 +8,7 @@ import '../models/job.dart';
 class JobApiService {
   final String baseUrl;
 
-  JobApiService({this.baseUrl = 'http://localhost:8000'});
+  JobApiService({this.baseUrl = 'https://flutter-ai-image-studio.onrender.com'});
 
   /// Helper to get MIME type from filename
   String _getMimeType(String filename) {
