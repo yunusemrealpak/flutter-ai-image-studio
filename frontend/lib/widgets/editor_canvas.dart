@@ -1,5 +1,5 @@
-import 'dart:typed_data';
 import 'dart:html' as html;
+import 'dart:typed_data';
 
 import 'package:before_after/before_after.dart';
 import 'package:flutter/material.dart';
@@ -282,7 +282,8 @@ class _EditorCanvasState extends State<EditorCanvas> {
   }
 
   Widget _buildBottomToolbar() {
-    final bool hasImage = widget.imageUrl != null || widget.selectedImageBytes != null;
+    final bool hasImage =
+        widget.imageUrl != null || widget.selectedImageBytes != null;
 
     return Center(
       child: Container(
@@ -297,23 +298,15 @@ class _EditorCanvasState extends State<EditorCanvas> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildToolbarButton(
-              Icons.remove,
-              () {
-                setState(() => _zoomLevel = (_zoomLevel - 10).clamp(10, 500));
-              },
-              enabled: hasImage,
-            ),
+            _buildToolbarButton(Icons.remove, () {
+              setState(() => _zoomLevel = (_zoomLevel - 10).clamp(10, 500));
+            }, enabled: hasImage),
             const SizedBox(width: AppTheme.spacingS),
             _buildZoomIndicator(),
             const SizedBox(width: AppTheme.spacingS),
-            _buildToolbarButton(
-              Icons.add,
-              () {
-                setState(() => _zoomLevel = (_zoomLevel + 10).clamp(10, 500));
-              },
-              enabled: hasImage,
-            ),
+            _buildToolbarButton(Icons.add, () {
+              setState(() => _zoomLevel = (_zoomLevel + 10).clamp(10, 500));
+            }, enabled: hasImage),
             const SizedBox(width: AppTheme.spacingL),
             _buildToolbarDivider(),
             const SizedBox(width: AppTheme.spacingL),
@@ -325,13 +318,9 @@ class _EditorCanvasState extends State<EditorCanvas> {
             const SizedBox(width: AppTheme.spacingL),
             _buildToolbarDivider(),
             const SizedBox(width: AppTheme.spacingL),
-            _buildToolbarButton(
-              Icons.fit_screen,
-              () {
-                setState(() => _zoomLevel = 100.0);
-              },
-              enabled: hasImage,
-            ),
+            _buildToolbarButton(Icons.fit_screen, () {
+              setState(() => _zoomLevel = 100.0);
+            }, enabled: hasImage),
           ],
         ),
       ),
