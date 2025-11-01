@@ -26,7 +26,8 @@ class EditorCanvas extends StatefulWidget {
 
 class _EditorCanvasState extends State<EditorCanvas> {
   double _zoomLevel = 100.0;
-  double _value = 0.1;
+  double _value = 0.5;
+  bool _showBeforeAfter = false;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +75,14 @@ class _EditorCanvasState extends State<EditorCanvas> {
             // Main image or placeholder
             _buildImageOrPlaceholder(),
 
+            // Before/After toggle button (only show when both images available)
+            if (widget.beforeImageUrl != null && widget.imageUrl != null)
+              Positioned(
+                top: AppTheme.spacingL,
+                right: AppTheme.spacingL,
+                child: _buildBeforeAfterToggle(),
+              ),
+
             // Bottom toolbar
             Positioned(
               bottom: AppTheme.spacingL,
@@ -88,8 +97,10 @@ class _EditorCanvasState extends State<EditorCanvas> {
   }
 
   Widget _buildImageOrPlaceholder() {
-    // Show before/after comparison if both images are available
-    if (widget.beforeImageUrl != null && widget.imageUrl != null) {
+    // Show before/after comparison if enabled and both images are available
+    if (widget.beforeImageUrl != null &&
+        widget.imageUrl != null &&
+        _showBeforeAfter) {
       return _buildBeforeAfterComparison();
     }
 
@@ -160,6 +171,66 @@ class _EditorCanvasState extends State<EditorCanvas> {
             _value = value;
           });
         },
+      ),
+    );
+  }
+
+  Widget _buildBeforeAfterToggle() {
+    return Container(
+      decoration: BoxDecoration(
+        color: _showBeforeAfter
+            ? AppTheme.primaryBlue
+            : AppTheme.surfaceDarker.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(AppTheme.radiusL),
+        border: Border.all(
+          color: _showBeforeAfter
+              ? AppTheme.primaryBlue
+              : AppTheme.dividerColor,
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _showBeforeAfter = !_showBeforeAfter;
+              // Reset slider position when toggling
+              if (_showBeforeAfter) {
+                _value = 0.5;
+              }
+            });
+          },
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.spacingL,
+              vertical: AppTheme.spacingM,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.compare,
+                  color: _showBeforeAfter
+                      ? Colors.white
+                      : AppTheme.textSecondary,
+                  size: 20,
+                ),
+                const SizedBox(width: AppTheme.spacingS),
+                Text(
+                  _showBeforeAfter ? 'Hide Compare' : 'Compare',
+                  style: AppTheme.bodySmall.copyWith(
+                    color: _showBeforeAfter
+                        ? Colors.white
+                        : AppTheme.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
