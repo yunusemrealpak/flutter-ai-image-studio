@@ -84,10 +84,11 @@ class _EditorCanvasState extends State<EditorCanvas> {
             _buildImageOrPlaceholder(),
 
             // Processing overlay (blur + animation)
-            // Show when processing and we have an image to show (either new upload or existing job)
+            // Show when processing and we have any image to show
             if (widget.isProcessing &&
                 (widget.selectedImageBytes != null ||
-                    widget.beforeImageUrl != null))
+                    widget.beforeImageUrl != null ||
+                    widget.imageUrl != null))
               _buildProcessingOverlay(),
 
             // Before/After toggle button (only show when both images available)
