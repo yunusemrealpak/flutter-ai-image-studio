@@ -1,5 +1,6 @@
 import os
 import base64
+import asyncio
 from typing import Optional, Dict, Any, Callable
 from io import BytesIO
 from PIL import Image
@@ -66,7 +67,6 @@ class FalAIService:
 
             # Use run_async for simplicity (blocks until completion)
             # Progress updates will be simulated based on estimated time
-            import asyncio
 
             # Start the API call
             result_task = asyncio.create_task(
