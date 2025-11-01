@@ -34,25 +34,34 @@ class _EditorScreenState extends State<EditorScreen> {
   @override
   void initState() {
     super.initState();
-    _loadJobs();
+
     // Listen to job changes to clear selected image when job completes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<JobProvider>().addListener(_onJobChanged);
 
-      // If initialJobId is provided, load that job
+      // First load all jobs
+      await _loadJobs();
+
+      // Then if initialJobId is provided, load that specific job
       if (widget.initialJobId != null) {
-        _loadInitialJob(widget.initialJobId!);
+        await _loadInitialJob(widget.initialJobId!);
       }
     });
   }
 
   Future<void> _loadInitialJob(String jobId) async {
     final jobProvider = context.read<JobProvider>();
-    final job = jobProvider.jobs.firstWhere(
-      (j) => j.id == jobId,
-      orElse: () => jobProvider.jobs.first,
-    );
-    jobProvider.setCurrentJob(job);
+
+    try {
+      // Find the job in the loaded jobs list
+      final job = jobProvider.jobs.firstWhere(
+        (j) => j.id == jobId,
+      );
+      jobProvider.setCurrentJob(job);
+    } catch (e) {
+      // Job not found, show error
+      _showError('Job not found');
+    }
   }
 
   void _onJobChanged() {
