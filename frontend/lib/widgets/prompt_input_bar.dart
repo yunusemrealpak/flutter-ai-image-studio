@@ -29,9 +29,22 @@ class _PromptInputBarState extends State<PromptInputBar> {
   final FocusNode _focusNode = FocusNode();
 
   @override
+  void initState() {
+    super.initState();
+    // Listen to controller changes to rebuild when text changes
+    widget.controller.addListener(_onTextChanged);
+  }
+
+  @override
   void dispose() {
+    widget.controller.removeListener(_onTextChanged);
     _focusNode.dispose();
     super.dispose();
+  }
+
+  void _onTextChanged() {
+    // Rebuild to update button state when text changes
+    setState(() {});
   }
 
   @override
