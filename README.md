@@ -1,364 +1,363 @@
-# AI Image Editing Web Application
+# AI Image Editing Web App
 
-Full-stack web application for AI-powered image editing using fal.ai's Seedream v4 model.
+Production-ready AI image editing platform built with Flutter Web and FastAPI, powered by fal.ai's Seedream v4 model.
 
-## 📋 Overview
+## 🌐 Live Demo
 
-This project is a production-ready AI image editing platform that allows users to upload images, provide text prompts describing desired edits, and receive AI-generated edited images. The application features a responsive Flutter Web frontend and a FastAPI Python backend.
+- **Frontend:** [https://flutter-ai-image-studio.web.app](https://flutter-ai-image-studio.web.app)
+- **Backend API:** [https://flutter-ai-image-studio.onrender.com](https://flutter-ai-image-studio.onrender.com)
+- **API Docs:** [https://flutter-ai-image-studio.onrender.com/docs](https://flutter-ai-image-studio.onrender.com/docs)
 
 ## ✨ Features
 
-### Core Features (Required)
-- ✅ **Image Upload:** Drag & drop or file picker interface
-- ✅ **Prompt Input:** Text field for editing instructions (max 1000 characters)
-- ✅ **AI Processing:** Integration with fal.ai Seedream v4 Edit model
-- ✅ **Result Display:** Preview of edited images
-- ✅ **Download:** Save edited images locally
-- ✅ **Job Tracking:** Status monitoring (pending, processing, completed, failed)
-- ✅ **Job History:** List all previous editing jobs
+### Core Features
+- ✅ **Image Upload** - Drag & drop or file picker
+- ✅ **AI-Powered Editing** - Natural language prompts for image editing
+- ✅ **Real-time Progress** - Live progress tracking with visual feedback
+- ✅ **Job Management** - Complete history of all editing jobs
+- ✅ **Download** - Save edited images locally
+- ✅ **Responsive Design** - Works on desktop, tablet, and mobile
 
-### Additional Features
-- ✅ **Responsive Design:** Works on desktop, tablet, and mobile
-- ✅ **Error Handling:** User-friendly error messages
-- ✅ **Loading States:** Visual feedback during processing
-- ✅ **CORS Enabled:** Frontend-backend communication configured
-- ✅ **Clean Architecture:** Modular, maintainable code structure
+### Bonus Features Implemented
+- ✅ **SQL Database** - SQLite for persistent job storage (survives server restarts)
+- ✅ **Version History** - View and revisit all previous edits
+- ✅ **Before/After Comparison** - Interactive slider to compare original vs edited
+- ✅ **URL Routing** - Deep linking support with job IDs in URL
+- ✅ **Processing Overlay** - Blur effect with AI animation during generation
+- ✅ **Prompt Display** - See which prompt created each image
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────┐         ┌──────────────────┐         ┌─────────────┐
-│  Flutter Web    │  HTTP   │   FastAPI        │   API   │  fal.ai     │
-│   Frontend      │ ◄─────► │   Backend        │ ◄─────► │  Seedream   │
-│                 │         │                  │         │  v4 Edit    │
-└─────────────────┘         └──────────────────┘         └─────────────┘
-       │                            │
-       │                            │
-       ▼                            ▼
-  Firebase/Vercel            Render.com
-   (Hosting)                (Deployment)
+┌─────────────────────┐         ┌──────────────────┐         ┌─────────────┐
+│   Flutter Web       │  HTTP   │   FastAPI        │   API   │  fal.ai     │
+│   (Frontend)        │ ◄─────► │   (Backend)      │ ◄─────► │  Seedream   │
+│  - UI/UX            │         │  - Job Queue     │         │  v4 Edit    │
+│  - State Mgmt       │         │  - SQLite DB     │         └─────────────┘
+│  - URL Routing      │         │  - Progress API  │
+└─────────────────────┘         └──────────────────┘
+       │                                │
+       ▼                                ▼
+  Firebase Hosting              Render.com
 ```
 
-### Tech Stack
+### Request Flow
+1. User uploads image + prompt → Frontend
+2. Frontend → `POST /api/jobs` → Backend creates job (PROCESSING status)
+3. Backend → fal.ai API (async background task)
+4. Frontend polls `GET /api/jobs/{id}` every 2s for progress updates
+5. Backend updates job progress (0% → 100%) in SQLite
+6. When complete → Frontend displays result with before/after comparison
 
-**Frontend:**
-- Flutter Web 3.9+
-- Provider (State Management)
-- HTTP Client
-- File Picker
+## 🛠️ Tech Stack
 
-**Backend:**
-- Python 3.11
-- FastAPI 0.104
-- fal-client (AI API)
-- Uvicorn (ASGI Server)
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | Flutter Web 3.9+, Provider (state), go_router (routing), http client |
+| **Backend** | Python 3.11, FastAPI 0.104, SQLAlchemy 2.0 (async), SQLite, Uvicorn |
+| **AI Service** | fal.ai Seedream v4 Edit Model |
+| **Deployment** | Frontend: Firebase Hosting, Backend: Render.com |
 
-**AI Service:**
-- fal.ai Seedream v4 Edit Model
-
-**Deployment:**
-- Frontend: Firebase Hosting / Vercel
-- Backend: Render.com
-
-## 📁 Project Structure
-
-```
-voltran_study_case/
-├── backend/                    # FastAPI backend
-│   ├── app/
-│   │   ├── main.py            # FastAPI app & CORS
-│   │   ├── config.py          # Environment configuration
-│   │   ├── models.py          # Data models
-│   │   ├── routers/
-│   │   │   └── jobs.py        # API endpoints
-│   │   └── services/
-│   │       └── fal_ai.py      # fal.ai integration
-│   ├── requirements.txt
-│   ├── .env                   # Environment variables
-│   ├── Procfile              # Render deployment
-│   ├── render.yaml           # Render configuration
-│   └── README.md
-│
-├── frontend/                  # Flutter Web frontend
-│   ├── lib/
-│   │   ├── main.dart         # App entry point
-│   │   ├── models/
-│   │   │   └── job.dart      # Job model
-│   │   ├── services/
-│   │   │   └── api_service.dart  # Backend API client
-│   │   ├── providers/
-│   │   │   └── image_editor_provider.dart  # State management
-│   │   ├── screens/
-│   │   │   └── home_screen.dart  # Main screen
-│   │   └── widgets/
-│   │       ├── image_upload_area.dart
-│   │       ├── prompt_input.dart
-│   │       └── result_display.dart
-│   ├── web/
-│   ├── pubspec.yaml
-│   ├── firebase.json         # Firebase config
-│   ├── vercel.json          # Vercel config
-│   └── README.md
-│
-└── README.md                 # This file
-```
-
-## 🚀 Quick Start
+## 🚀 Local Setup
 
 ### Prerequisites
-
 - Python 3.11+
 - Flutter SDK 3.9+
-- Node.js (for deployment tools)
-- Git
+- fal.ai API key (provided in assignment)
 
 ### Backend Setup
 
 ```bash
-# Navigate to backend directory
+# Navigate to backend
 cd backend
 
 # Create virtual environment
 python -m venv venv
-
-# Activate virtual environment
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate  # Windows
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Create .env file (copy from .env.example)
-cp .env.example .env
+# Create .env file
+echo "FAL_KEY=your_fal_ai_api_key_here" > .env
 
-# Edit .env and add your fal.ai API key
-# FAL_AI_API_KEY=your_key_here
-
-# Run the server
+# Run server (creates jobs.db automatically)
 python -m app.main
 ```
 
-Backend will run at `http://localhost:8000`
-
-API Documentation: `http://localhost:8000/docs`
+Backend runs at `http://localhost:8000`
+API docs at `http://localhost:8000/docs`
 
 ### Frontend Setup
 
 ```bash
-# Navigate to frontend directory
+# Navigate to frontend
 cd frontend
 
 # Install dependencies
 flutter pub get
 
-# Update backend URL in lib/services/api_service.dart
-# Set baseUrl to your backend URL
-
-# Run the app
+# Run app
 flutter run -d chrome
 ```
 
-Frontend will open in Chrome.
+Frontend opens in Chrome at `http://localhost:xxxxx`
+
+**Note:** Frontend is configured to use production backend URL. For local development, update `lib/services/job_api_service.dart`:
+
+```dart
+JobApiService({this.baseUrl = 'http://localhost:8000'});
+```
 
 ## 📡 API Endpoints
 
-### POST /api/jobs
-Create a new image editing job.
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/jobs` | POST | Create new editing job (returns immediately, processes in background) |
+| `/api/jobs/{job_id}` | GET | Get job status and result |
+| `/api/jobs` | GET | List all jobs (newest first) |
+| `/api/jobs/{job_id}` | DELETE | Delete a job |
+| `/health` | GET | Health check |
 
-**Request:**
-- `image` (multipart/form-data): Image file
-- `prompt` (form field): Text prompt for editing
-
-**Response:**
-```json
-{
-  "id": "uuid",
-  "prompt": "text prompt",
-  "status": "completed",
-  "result_image_url": "https://...",
-  "created_at": "2025-10-31T...",
-  "updated_at": "2025-10-31T..."
-}
-```
-
-### GET /api/jobs/{job_id}
-Get job status and result.
-
-**Response:**
-```json
-{
-  "id": "uuid",
-  "prompt": "text prompt",
-  "status": "completed",
-  "result_image_url": "https://...",
-  "created_at": "2025-10-31T...",
-  "updated_at": "2025-10-31T..."
-}
-```
-
-### GET /api/jobs
-List all jobs (newest first).
-
-**Response:**
-```json
-[
-  {
-    "id": "uuid",
-    "prompt": "text prompt",
-    "status": "completed",
-    "result_image_url": "https://...",
-    "created_at": "2025-10-31T...",
-    "updated_at": "2025-10-31T..."
-  }
-]
-```
-
-## 🌐 Deployment
-
-### Backend Deployment (Render.com)
-
-1. Push code to GitHub
-2. Create new Web Service on Render.com
-3. Connect your repository
-4. Render will detect `render.yaml` automatically
-5. Add environment variable: `FAL_AI_API_KEY`
-6. Deploy!
-
-Your backend will be live at: `https://your-app.onrender.com`
-
-### Frontend Deployment (Firebase Hosting)
+### Example: Create Job
 
 ```bash
-# Install Firebase CLI
-npm install -g firebase-tools
-
-# Login
-firebase login
-
-# Initialize (first time only)
-firebase init hosting
-
-# Build and deploy
-flutter build web --release
-firebase deploy
-```
-
-Your frontend will be live at: `https://your-project.web.app`
-
-**Important:** Update `baseUrl` in `frontend/lib/services/api_service.dart` to your deployed backend URL.
-
-## 🧪 Testing
-
-### Backend Testing
-```bash
-# Using curl
 curl -X POST http://localhost:8000/api/jobs \
-  -F "image=@test_image.png" \
-  -F "prompt=Change background to beach"
-
-# Get job
-curl http://localhost:8000/api/jobs/{job_id}
-
-# List all jobs
-curl http://localhost:8000/api/jobs
+  -F "image=@photo.jpg" \
+  -F "prompt=Add sunglasses and make background tropical beach"
 ```
 
-### Frontend Testing
-1. Start both backend and frontend locally
-2. Upload a test image
-3. Enter a prompt (e.g., "Add sunglasses to the person")
-4. Click Generate
-5. Wait for processing
-6. Download the result
+Response:
+```json
+{
+  "id": "uuid-here",
+  "status": "processing",
+  "progress": 0,
+  "prompt": "Add sunglasses...",
+  "original_image_url": "data:image/...",
+  "edited_image_url": null
+}
+```
 
-## 🎨 AI Model Details
+### Poll for Progress
 
-**Model:** fal-ai/bytedance/seedream/v4/edit
+```bash
+curl http://localhost:8000/api/jobs/{job_id}
+```
 
-**Capabilities:**
+Response (completed):
+```json
+{
+  "id": "uuid-here",
+  "status": "completed",
+  "progress": 100,
+  "edited_image_url": "https://fal.media/files/...",
+  "created_at": "2025-11-01T12:00:00",
+  "updated_at": "2025-11-01T12:02:00"
+}
+```
+
+## 🤖 fal.ai Integration
+
+**Model:** `fal-ai/bytedance/seedream/v4/edit`
+
+**Why Seedream v4?**
 - High-quality image-to-image editing
-- Natural language prompt understanding
-- Multiple editing operations in one prompt
+- Strong natural language understanding
+- Fast processing (typically 30-60 seconds)
+- Commercial use allowed
 - Safety checker enabled
-- Commercial use permitted
+
+**How it works:**
+1. Image + prompt sent to fal.ai via `fal_client.run_async()`
+2. Backend simulates progress (10% increments every 2s) since fal.ai doesn't provide real-time progress
+3. Final result returned when API completes
+4. Job updated in database with edited image URL
 
 **Example Prompts:**
-- "Change background to a beach sunset"
-- "Add sunglasses and a hat"
-- "Make it look like a painting"
-- "Convert to black and white"
+- "Change background to mountain sunset"
+- "Add colorful flowers in the foreground"
+- "Make it look like a watercolor painting"
+- "Convert to black and white with high contrast"
 
-## ⚙️ Environment Variables
+## 📂 Project Structure
 
-### Backend (.env)
 ```
-FAL_AI_API_KEY=your_fal_ai_api_key
-PORT=8000
-HOST=0.0.0.0
-ENVIRONMENT=development
+voltran_study_case/
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # FastAPI app, CORS, lifespan
+│   │   ├── database.py          # SQLAlchemy async config
+│   │   ├── models.py            # Pydantic + SQLAlchemy models
+│   │   ├── routers/
+│   │   │   └── jobs.py          # Job API endpoints
+│   │   ├── services/
+│   │   │   ├── fal_ai.py        # fal.ai integration
+│   │   │   └── job_service.py   # Job business logic
+│   │   └── storage/
+│   │       └── __init__.py      # Database operations
+│   ├── requirements.txt
+│   └── jobs.db                  # SQLite database (auto-created)
+│
+├── frontend/
+│   ├── lib/
+│   │   ├── main.dart            # App entry, routing
+│   │   ├── models/job.dart      # Job model
+│   │   ├── providers/
+│   │   │   └── job_provider.dart # State management
+│   │   ├── services/
+│   │   │   └── job_api_service.dart # Backend API client
+│   │   ├── screens/
+│   │   │   └── editor_screen.dart # Main editor UI
+│   │   ├── widgets/
+│   │   │   ├── editor_canvas.dart     # Image display
+│   │   │   ├── prompt_input_bar.dart  # Prompt input
+│   │   │   ├── app_drawer.dart        # Job history
+│   │   │   └── recent_edits_bar.dart  # Bottom bar
+│   │   └── theme/app_theme.dart
+│   └── pubspec.yaml
+│
+└── README.md
 ```
 
-### Frontend
-Update `lib/services/api_service.dart`:
-```dart
-static const String baseUrl = 'http://localhost:8000';  // Development
-// static const String baseUrl = 'https://your-backend.onrender.com';  // Production
-```
+## 🎯 Optional Features Implemented
 
-## 🔧 Known Issues & Limitations
+### 1. **SQLite Database** ✅
+- Persistent job storage using SQLAlchemy async
+- Survives server restarts (unlike in-memory storage)
+- Automatic table creation on startup
+- All CRUD operations async
 
-### Current Limitations
-- **Storage:** Jobs stored in-memory (lost on server restart)
-- **Rate Limits:** Subject to fal.ai API rate limits
-- **File Size:** Large images may take longer to process
-- **Browser Support:** Limited file picker on some mobile browsers
+### 2. **Version History** ✅
+- View all previous editing jobs
+- Sidebar with thumbnails and timestamps
+- Click to revisit any previous edit
+- Delete functionality
+
+### 3. **Before/After Slider** ✅
+- Interactive slider to compare original vs edited
+- Toggle button appears after edit completes
+- Smooth transition animation
+
+### 4. **URL Routing & Deep Linking** ✅
+- Each job has unique URL: `/job/{job_id}`
+- Share links to specific edits
+- Browser back/forward navigation
+- Clean URLs (no hash fragments)
+
+### 5. **Enhanced UX**
+- Blur overlay with AI animation during processing
+- Progress percentage in Generate button
+- Prompt display under each image
+- "New Edit" button in app bar
+- Remove uploaded image button
+
+## ⚠️ Known Issues & Trade-offs
+
+### Limitations
+1. **Progress Simulation:** fal.ai doesn't provide real-time progress, so we simulate it (10% increments every 2s). Actual processing time varies.
+
+2. **Image Storage:** Original images stored as base64 data URIs in database. For production at scale, would use cloud storage (S3, Cloudinary) with URLs.
+
+3. **Cold Starts:** Render.com free tier has ~30-60s cold start on first request after inactivity.
+
+4. **Database Persistence:** SQLite file on Render.com's ephemeral filesystem. For true persistence, would use PostgreSQL or external storage.
+
+5. **Error Recovery:** If fal.ai request fails mid-processing, job marked as FAILED but partial progress not resumed.
+
+### Trade-offs Made
+- **Simplicity over Scale:** Chose SQLite for quick setup vs PostgreSQL for better production scalability
+- **Simulated Progress:** Provides better UX than no feedback, even if not 100% accurate
+- **In-database Images:** Faster development, but wouldn't scale to millions of jobs
 
 ### Future Improvements
-- [ ] SQL database for persistent storage (bonus feature)
-- [ ] Before/After image slider (bonus feature)
-- [ ] Batch image processing
-- [ ] Custom model parameters
-- [ ] Image history with thumbnails
-- [ ] User authentication
-- [ ] Rate limiting implementation
+- [ ] External image storage (S3/Cloudinary)
+- [ ] PostgreSQL for production database
+- [ ] Batch processing multiple images
+- [ ] User authentication & private galleries
+- [ ] Advanced editing parameters (strength, steps, etc.)
+- [ ] Image caching & CDN
 
 ## 🤖 AI Tools Usage
 
-This project was developed with assistance from **Claude Code**, Anthropic's AI-powered development assistant. Here's how AI tools were utilized:
+This project was developed with assistance from **Claude Code** (Anthropic's AI development assistant). Here's how AI tools were leveraged:
 
-### Development Process
-1. **Architecture Planning:** Designed system architecture and component structure
-2. **Code Generation:** Created boilerplate code for models, services, and UI components
-3. **Documentation:** Generated comprehensive README files and code comments
-4. **Debugging:** Identified and fixed issues during development
-5. **Best Practices:** Applied clean code principles and design patterns
+### Development Strategy
 
-### Implementation Strategy
-- **Iterative Development:** Built features incrementally (backend-first approach)
-- **Code Review:** AI-assisted code quality checks
-- **Documentation:** Auto-generated inline comments and documentation
-- **Testing Guidance:** Suggested testing strategies and edge cases
+**1. Architecture Design**
+- Claude helped design the async job processing system
+- Discussed trade-offs between polling vs webhooks
+- Planned SQLite → PostgreSQL migration path
+
+**2. Code Implementation**
+- **Backend:** FastAPI app structure, SQLAlchemy models, async database operations
+- **Frontend:** Flutter widget hierarchy, state management with Provider, URL routing with go_router
+- **Integration:** fal.ai API calls, error handling, progress tracking
+
+**3. Debugging & Problem-Solving**
+- Python 3.13 compatibility issues with SQLAlchemy → upgraded to 2.0.36
+- Missing greenlet dependency → identified and added to requirements
+- CORS configuration for production deployment
+- Deep linking issues → implemented didUpdateWidget for job switching
+
+**4. Documentation**
+- Generated comprehensive README
+- Code comments and docstrings
+- API documentation
 
 ### Prompting Approach
-- Clear, specific requirements with examples
-- Incremental feature requests
-- Architecture-first planning
-- Error-driven debugging
 
-**Result:** Efficient development with clean, maintainable code and comprehensive documentation.
+**Effective Prompts Used:**
+- "Implement async job processing with FastAPI BackgroundTasks"
+- "Add SQLite database with SQLAlchemy async for job persistence"
+- "Fix: Job image disappears after upload, keep visible during processing"
+- "Add URL routing so each job has unique shareable link"
 
-## 📝 License
+**Iterative Development:**
+- Started with basic features, incrementally added complexity
+- Tested each feature before moving to next
+- Refactored when issues found (e.g., state transition tracking)
+
+**Result:** Claude Code enabled rapid development while maintaining code quality, proper architecture, and comprehensive documentation. The AI assistant was particularly valuable for:
+- Boilerplate reduction
+- Best practices guidance
+- Quick debugging
+- Documentation generation
+
+## 📦 Deployment
+
+### Backend (Render.com)
+
+1. **Connect GitHub Repository**
+2. **Render auto-detects:** `requirements.txt` and sets up Python environment
+3. **Add Environment Variable:** `FAL_KEY=your_api_key`
+4. **Build Command:** `pip install -r requirements.txt`
+5. **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+
+Backend automatically creates `jobs.db` on first run.
+
+### Frontend (Firebase Hosting)
+
+```bash
+# Build production app
+flutter build web --release
+
+# Deploy to Firebase
+firebase deploy --only hosting
+```
+
+**Note:** Update `baseUrl` in `job_api_service.dart` to production backend URL before building.
+
+## 📄 License
 
 This project is part of a technical assignment for Voltran.
 
 ## 👤 Author
 
 **Yunus Emre Alpak**
-- Email: yunusemrealpak@gmail.com
+Email: yunusemrealpak@gmail.com
+GitHub: [yunusemrealpak](https://github.com/yunusemrealpak)
 
-## 🙏 Acknowledgments
+---
 
-- fal.ai for the AI image editing API
-- Flutter team for the excellent web framework
-- FastAPI team for the modern Python web framework
-- Anthropic for Claude Code development assistance
+Built with ❤️ using Flutter, FastAPI, and fal.ai
