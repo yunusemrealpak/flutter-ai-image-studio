@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../theme/app_theme.dart';
+import 'full_screen_image_viewer.dart';
 
 /// Main canvas area for image editing
 class EditorCanvas extends StatefulWidget {
@@ -30,8 +31,6 @@ class _EditorCanvasState extends State<EditorCanvas> {
   double _zoomLevel = 100.0;
   double _value = 0.5;
   bool _showBeforeAfter = false;
-  final TransformationController _transformationController =
-      TransformationController();
 
   @override
   Widget build(BuildContext context) {
@@ -127,23 +126,21 @@ class _EditorCanvasState extends State<EditorCanvas> {
       return _buildPlaceholder();
     }
 
-    // Wrap image with InteractiveViewer for zoom/pan
-    return InteractiveViewer(
-      transformationController: _transformationController,
-      minScale: 0.1,
-      maxScale: 5.0,
-      constrained: false,
-      child: Center(child: imageWidget),
+    // Center image with zoom applied via Transform.scale
+    final scale = _zoomLevel / 100.0;
+    return Center(
+      child: Transform.scale(
+        scale: scale,
+        child: imageWidget,
+      ),
     );
   }
 
   Widget _buildBeforeAfterComparison() {
-    return InteractiveViewer(
-      transformationController: _transformationController,
-      minScale: 0.1,
-      maxScale: 5.0,
-      constrained: false,
-      child: Center(
+    final scale = _zoomLevel / 100.0;
+    return Center(
+      child: Transform.scale(
+        scale: scale,
         child: BeforeAfter(
           value: _value,
           before: Image.network(
@@ -341,6 +338,14 @@ class _EditorCanvasState extends State<EditorCanvas> {
             _buildToolbarDivider(),
             const SizedBox(width: AppTheme.spacingL),
             _buildToolbarButton(
+              Icons.fullscreen,
+              () => _handleFullScreen(),
+              enabled: hasImage,
+            ),
+            const SizedBox(width: AppTheme.spacingL),
+            _buildToolbarDivider(),
+            const SizedBox(width: AppTheme.spacingL),
+            _buildToolbarButton(
               Icons.fit_screen,
               () => _handleFitScreen(),
               enabled: hasImage,
@@ -354,27 +359,35 @@ class _EditorCanvasState extends State<EditorCanvas> {
   void _handleZoomIn() {
     setState(() {
       _zoomLevel = (_zoomLevel + 10).clamp(10, 500);
-      _applyZoom();
     });
   }
 
   void _handleZoomOut() {
     setState(() {
       _zoomLevel = (_zoomLevel - 10).clamp(10, 500);
-      _applyZoom();
     });
   }
 
   void _handleFitScreen() {
     setState(() {
       _zoomLevel = 100.0;
-      _transformationController.value = Matrix4.identity();
     });
   }
 
-  void _applyZoom() {
-    final scale = _zoomLevel / 100.0;
-    _transformationController.value = Matrix4.identity()..scale(scale);
+  void _handleFullScreen() {
+    // Get current image to show in full screen
+    String? imageUrl = widget.imageUrl;
+    Uint8List? imageBytes = widget.selectedImageBytes;
+
+    // Navigate to full screen viewer
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => FullScreenImageViewer(
+          imageUrl: imageUrl,
+          imageBytes: imageBytes,
+        ),
+      ),
+    );
   }
 
   Future<void> _handleDownload() async {
