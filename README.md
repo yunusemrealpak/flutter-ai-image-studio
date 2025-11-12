@@ -2,12 +2,6 @@
 
 Production-ready AI image editing platform built with Flutter Web and FastAPI, powered by fal.ai's Seedream v4 model.
 
-## 🌐 Live Demo
-
-- **Frontend:** [https://flutter-ai-image-studio.web.app](https://flutter-ai-image-studio.web.app)
-- **Backend API:** [https://flutter-ai-image-studio.onrender.com](https://flutter-ai-image-studio.onrender.com)
-- **API Docs:** [https://flutter-ai-image-studio.onrender.com/docs](https://flutter-ai-image-studio.onrender.com/docs)
-
 ## ✨ Features
 
 ### Core Features
